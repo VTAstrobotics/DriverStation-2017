@@ -1,0 +1,109 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+                android:layout_height="match_parent" android:background="#0099cc"
+                tools:context=".HUDActivity">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" android:adjustViewBounds="false"
+        android:alpha="0.25" android:src="@drawable/astrobotics_logo"/>
+
+    <org.astrobotics.ds2017.io.MjpegView
+        android:id="@+id/stream"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:visibility="invisible"
+        />
+
+    <View
+        android:id="@+id/robot_status"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="4dp"
+        android:background="@drawable/indicator"/>
+
+    <View
+        android:id="@+id/controller_status"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="4dp"
+        android:background="@drawable/indicator"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignTop="@+id/stream_buttons"
+        android:layout_gravity="center" android:layout_toLeftOf="@+id/stream_buttons"
+        android:layout_toStartOf="@+id/stream_buttons"
+        android:gravity="center" android:text="@string/cam_left"
+        android:textColor="@color/cam_text_color"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/stream_buttons"
+        android:layout_centerHorizontal="true"
+        android:text="@string/cam_none" android:textColor="@color/cam_text_color"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignTop="@+id/stream_buttons"
+        android:layout_gravity="center"
+        android:layout_toEndOf="@+id/stream_buttons" android:layout_toRightOf="@+id/stream_buttons"
+        android:gravity="center" android:text="@string/cam_right"
+        android:textColor="@color/cam_text_color"/>
+
+    <RadioGroup
+        android:id="@+id/stream_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="bottom"
+        android:backgroundTint="#505bf5"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/cam_left"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom"
+            android:buttonTint="#505bf5"/>
+        <RadioButton
+            android:id="@+id/cam_none"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom"
+            android:buttonTint="#505bf5" android:checked="true"/>
+        <RadioButton
+            android:id="@+id/cam_right"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom"
+            android:buttonTint="#505bf5"/>
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/wifiLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/cam_text_color"/>
+
+</RelativeLayout>
