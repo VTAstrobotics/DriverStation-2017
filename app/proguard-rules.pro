@@ -16,4 +16,4 @@
 #   public *;
 #}
 
--keepattributes EnclosingMethod
+-dontwarn InnerClasses

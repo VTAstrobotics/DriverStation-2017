@@ -47,14 +47,13 @@ public class Talker extends AbstractNodeMain {
     private ByteBuffer buf = ByteBuffer.wrap(bits);
     @Override
     public GraphName getDefaultNodeName() {
-
-        return GraphName.of("ROS Android");
+        return GraphName.of("ds2017");
     }
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
         final Publisher<std_msgs.ByteMultiArray> publisher =
-                connectedNode.newPublisher("Android Device", std_msgs.ByteMultiArray._TYPE);
+                connectedNode.newPublisher("/robot/teleop", std_msgs.ByteMultiArray._TYPE);
         // This CancellableLoop will be canceled automatically when the node shuts
         // down.
         connectedNode.executeCancellableLoop(new CancellableLoop() {
@@ -68,12 +67,12 @@ public class Talker extends AbstractNodeMain {
 
             @Override
             protected void loop() throws InterruptedException {
-/*
+
                 std_msgs.ByteMultiArray ByteArray = publisher.newMessage();
-                ByteArray.setData(buf); //TODO: Find out how the hell to make a multi byte array work
+//                ByteArray.setData(buf); //TODO: Find out how the hell to make a multi byte array work
                 publisher.publish(ByteArray);
                 sequenceNumber++;
-                Thread.sleep(500);*/
+                Thread.sleep(500);
             }
         });
     }

@@ -1,6 +1,7 @@
 package org.astrobotics.ds2017;
 
 import java.io.IOException;
+import java.net.URI;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -30,8 +31,12 @@ import android.widget.Toast;
 
 import org.astrobotics.ds2017.io.MjpegView;
 import org.astrobotics.ds2017.io.Protocol;
+import org.astrobotics.ds2017.io.Talker;
+import org.ros.android.RosActivity;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMainExecutor;
 
-public class HUDActivity extends AppCompatActivity {
+public class HUDActivity extends RosActivity {
     private static final int[] AXES = new int[] {MotionEvent.AXIS_X, MotionEvent.AXIS_Y,
             MotionEvent.AXIS_Z, MotionEvent.AXIS_RZ, MotionEvent.AXIS_BRAKE,
             MotionEvent.AXIS_GAS, MotionEvent.AXIS_HAT_X, MotionEvent.AXIS_HAT_Y};
@@ -42,10 +47,16 @@ public class HUDActivity extends AppCompatActivity {
     private static final String url_turn_right = "http://10.0.0.50/decoder_control.cgi?command=1&user=VTAstrobot&pwd=RoVER16";
     private static final String url_turn_left = "http://10.0.0.50/decoder_control.cgi?command=1&user=VTAstrobot&pwd=RoVER16";
 
+    private static final URI ROBOT_ROS_URI = URI.create("http://10.0.0.30:11311");
+
     private Protocol protocol;
     private MjpegView mjpegView;
     private BroadcastReceiver wifiReceiver;
     private boolean oldRobotUp = false;
+
+    public HUDActivity() {
+        super("", "", ROBOT_ROS_URI);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +141,14 @@ public class HUDActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(wifiReceiver);
+    }
+
+    @Override
+    protected void init(NodeMainExecutor nodeMainExecutor) {
+        Talker talker = new Talker();
+
+        NodeConfiguration talkerConfig = NodeConfiguration.newPrivate(getMasterUri());
+        nodeMainExecutor.execute(talker, talkerConfig);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
