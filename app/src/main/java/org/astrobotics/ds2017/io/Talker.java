@@ -68,12 +68,12 @@ public class Talker extends AbstractNodeMain {
 
             @Override
             protected void loop() throws InterruptedException {
-
+/*
                 std_msgs.ByteMultiArray ByteArray = publisher.newMessage();
                 ByteArray.setData(buf); //TODO: Find out how the hell to make a multi byte array work
                 publisher.publish(ByteArray);
                 sequenceNumber++;
-                Thread.sleep(500);
+                Thread.sleep(500);*/
             }
         });
     }
