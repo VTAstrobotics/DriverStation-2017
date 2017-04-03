@@ -29,5 +29,6 @@
             </intent-filter>
         </service>
     </application>
+    <uses-feature android:name="android.hardware.wifi" />
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
