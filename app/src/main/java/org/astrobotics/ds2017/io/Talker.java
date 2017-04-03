@@ -26,6 +26,8 @@ import org.ros.node.topic.Publisher;
 
 import java.nio.ByteBuffer;
 
+import std_msgs.String;
+
 /**
  * A simple {@link Publisher} {@link NodeMain}.
  *
@@ -40,39 +42,38 @@ public class Talker extends AbstractNodeMain {
 
 
     //Copy method
-    public void getByteMultiArray(byte[] BYTE_ARRAY){
-        bits = BYTE_ARRAY;
 
-    }
-    private ByteBuffer buf = ByteBuffer.wrap(bits);
+
     @Override
     public GraphName getDefaultNodeName() {
+
         return GraphName.of("ds2017");
     }
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
-        final Publisher<std_msgs.ByteMultiArray> publisher =
-                connectedNode.newPublisher("/robot/teleop", std_msgs.ByteMultiArray._TYPE);
+        final Publisher<std_msgs.String> publisher =
+                connectedNode.newPublisher("/robot/teleop", std_msgs.String._TYPE);
         // This CancellableLoop will be canceled automatically when the node shuts
         // down.
         connectedNode.executeCancellableLoop(new CancellableLoop() {
-            private int sequenceNumber;
+            private int sequenceNumber;//Declares Counter That tells how many msgs have been sent
 
             @Override
             protected void setup() {
 
-                sequenceNumber = 0;
+                sequenceNumber = 0;//Initalizes counter to Zero First run through
             }
-
+            std_msgs.String setData(java.lang.String String){
+                std_msgs.String str = publisher.newMessage();//This inializes the String Message
+                str.setData(String);
+                return str;
+            }
             @Override
             protected void loop() throws InterruptedException {
-
-                std_msgs.ByteMultiArray ByteArray = publisher.newMessage();
-//                ByteArray.setData(buf); //TODO: Find out how the hell to make a multi byte array work
-                publisher.publish(ByteArray);
+                publisher.publish(setData("Crap"));//Publishes the set string
                 sequenceNumber++;
-                Thread.sleep(500);
+                Thread.sleep(80);
             }
         });
     }
