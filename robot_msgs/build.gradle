@@ -1,0 +1,30 @@
+apply plugin: 'java'
+
+def genDir = "${buildDir}/generated-src/main/java"
+
+task generateSources (type: JavaExec) {
+    group = 'build'
+    description = "Generate sources for ${project.name}"
+
+    outputs.dir(genDir)
+
+    classpath = configurations.runtime
+    main = 'org.ros.internal.message.GenerateInterfaces'
+    args genDir
+    args "--package-path=${projectDir}"
+    args project.name
+
+    tasks.compileJava.source outputs.files
+}
+
+compileJava {
+    dependsOn generateSources
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
+dependencies {
+    compile 'org.ros.rosjava_messages:std_msgs:+'
+    compile 'org.ros.rosjava_messages:geometry_msgs:+'
+    compile 'org.ros.rosjava_bootstrap:message_generation:0.3.0'
+}

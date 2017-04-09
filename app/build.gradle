@@ -36,4 +36,5 @@ dependencies {
     compile('org.ros.android_core:android_10:[0.3,0.4)') {
         exclude group: 'xml-apis'
     }
+    compile project(':robot_msgs')
 }

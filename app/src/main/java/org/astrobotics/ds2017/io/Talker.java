@@ -46,7 +46,6 @@ public class Talker extends AbstractNodeMain {
 
     @Override
     public GraphName getDefaultNodeName() {
-
         return GraphName.of("ds2017");
     }
 

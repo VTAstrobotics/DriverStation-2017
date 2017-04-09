@@ -3,10 +3,13 @@
 buildscript {
     repositories {
         //You may need to uncomment jcenter() for initial compiling
-//        jcenter()
+        jcenter()
+        maven {
+            url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:2.3.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
