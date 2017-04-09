@@ -132,11 +132,6 @@ public class HUDActivity extends RosActivity {
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(wifiReceiver);
@@ -154,14 +149,14 @@ public class HUDActivity extends RosActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         if(hasFocus) {
-            flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                      | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                      | View.SYSTEM_UI_FLAG_FULLSCREEN
+                      | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                      | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            getWindow().getDecorView().setSystemUiVisibility(flags);
         }
-        getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     @Override
@@ -262,6 +257,7 @@ public class HUDActivity extends RosActivity {
         setIndicator(R.id.controller_status, false);
     }
 
+    @SuppressWarnings("deprecation")
     private void updateWifiInfo(WifiInfo info) {
         String wifiText = "Wifi: ";
         if(info == null) {
@@ -279,9 +275,9 @@ public class HUDActivity extends RosActivity {
             if(!intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 return;
             }
-            NetworkInfo netInfo = (NetworkInfo)intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+            NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             if(netInfo.getState() == NetworkInfo.State.CONNECTED) {
-                WifiInfo wifiInfo = (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
+                WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
                 if(wifiInfo.getSSID().equals("<unknown ssid>")) {
                     updateWifiInfo(null);
                 } else {
@@ -293,6 +289,7 @@ public class HUDActivity extends RosActivity {
         }
 
         //implements the ability to turn camera
+        // FIXME this method not used anywhere - remove?
         public void onCameraControl (MotionEvent event){
             double  DPAD_BOUNDS = 0.1;
             if((event.getSource() & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
@@ -304,7 +301,5 @@ public class HUDActivity extends RosActivity {
                 }
             }
         }
-
-
     }
 }
