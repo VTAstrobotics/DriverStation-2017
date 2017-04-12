@@ -21,7 +21,7 @@ import org.astrobotics.ds2017.HUDActivity;
  * Implements the network protocol
  */
 public class Protocol {
-    //    private static final String TAG = "Astro-Proto-2016";
+
     private static final int DEADMAN = KeyEvent.KEYCODE_BUTTON_L1;
     private static final int ROBOT_PORT_SEND = 6800, ROBOT_PORT_RECEIVE = 6850;
     private static final int ROBOT_PING_SEND = 6900;
@@ -82,7 +82,7 @@ public class Protocol {
         connCheck = new Thread(new ConnCheckWorker(hudActivity), "Connectivity Check Thread");
         connCheck.start();
     }
-
+    //Function for setting the stick given the axis and the value
     public void setStick(int axis, float value) {
         switch(axis) {
             case MotionEvent.AXIS_X:
@@ -172,7 +172,6 @@ public class Protocol {
     }
 
     public void sendData() {
-//        Log.d(TAG, "Adding Data to send queue");
         sendQueue.offer(new ControlData(controlData));
     }
 
@@ -485,12 +484,6 @@ public class Protocol {
                 byte[] dataBytes = data.toBits();
                 try {
                     socket_send.send(new DatagramPacket(dataBytes, dataBytes.length, ROBOT_ADDRESS, ROBOT_PORT_SEND));
-                    // sleep for a small amount, just to slow down traffic
-//                    try {
-//                        Thread.sleep(10, 0);
-//                    } catch (InterruptedException e){
-//                        e.printStackTrace();
-//                    }
                 } catch(IOException e) {
                     e.printStackTrace();
                 }

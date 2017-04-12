@@ -287,19 +287,5 @@ public class HUDActivity extends RosActivity {
                 updateWifiInfo(null);
             }
         }
-
-        //implements the ability to turn camera
-        // FIXME this method not used anywhere - remove?
-        public void onCameraControl (MotionEvent event){
-            double  DPAD_BOUNDS = 0.1;
-            if((event.getSource() & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
-                if(event.getAxisValue(MotionEvent.AXIS_HAT_X)>DPAD_BOUNDS){
-                    loadStream(url_turn_right);
-                }
-                if(event.getAxisValue(MotionEvent.AXIS_HAT_X)<DPAD_BOUNDS){
-                    loadStream(url_turn_left);
-                }
-            }
-        }
     }
 }
