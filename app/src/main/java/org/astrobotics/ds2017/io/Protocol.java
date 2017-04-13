@@ -383,8 +383,6 @@ public class Protocol extends AbstractNodeMain {
                 // take it apart
                 // 0 = deadman
                 // 1 = voltage
-                // 2-3 = crc
-                // TODO check the crc
                 // handle the actual data
                 receiveData.setDeadMansDown(temp_bytes[0] != 0);
                 receiveData.setVoltage(temp_bytes[1]);
