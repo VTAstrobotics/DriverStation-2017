@@ -222,7 +222,7 @@ public class Protocol extends AbstractNodeMain {
         // if the dead man's switch is on or off
         private boolean isDeadMansDown;
         // holds the battery voltage
-        private byte voltage = 0x0;
+        private float voltage = 0x0;
 
         public ReceiveData() {
             this.isDeadMansDown = false;
@@ -233,7 +233,7 @@ public class Protocol extends AbstractNodeMain {
             this.isDeadMansDown = b;
         }
 
-        public void setVoltage(byte b) {
+        public void setVoltage(float b) {
             this.voltage = b;
         }
 
@@ -256,24 +256,24 @@ public class Protocol extends AbstractNodeMain {
         private static final double AXIS_BOUNDS = 0.1;
         // max/min axis values can be
         private static final double AXIS_MAX = 1.0;
-        // max value byte should be
-        private static final int AXIS_BYTE_MAX = 100;
+        // max value float should be
+        private static final int AXIS_FLOAT_MAX = 100;
         // for the dead zone in the dpad
         private static final double DPAD_BOUNDS = 0.1;
 
-        // array for data, everything can be stored in byte,
+        // array for data, everything can be stored in float,
         // though for buttons, only one bit will be used
-        public byte data[];
+        public float data[];
         public boolean buttonData[];
 
         // default constructor
         public ControlData() {
-            this.data = new byte[ControlIDs.SIZE];
+            this.data = new float[ControlIDs.SIZE];
         }
 
         // copy constructor
         public ControlData(ControlData oldData) {
-            this.data = new byte[oldData.data.length];
+            this.data = new float[oldData.data.length];
             // deep copy old data
             for(int i = 0; i < oldData.data.length; i++) {
                 this.data[i] = oldData.data[i];
@@ -298,18 +298,18 @@ public class Protocol extends AbstractNodeMain {
         public void setAxis(int ID, double value) {
             if(value > AXIS_BOUNDS) {
                 // truncate and make for 0 to 100
-                int tVal = (int) (AXIS_BYTE_MAX * (value / AXIS_MAX));
-                if(tVal > AXIS_BYTE_MAX) {
-                    data[ID] = AXIS_BYTE_MAX;
+                int tVal = (int) (AXIS_FLOAT_MAX * (value / AXIS_MAX));
+                if(tVal > AXIS_FLOAT_MAX) {
+                    data[ID] = AXIS_FLOAT_MAX;
                 } else {
-                    data[ID] = ((byte) tVal);
+                    data[ID] = ((float) tVal);
                 }
             } else if(value < -AXIS_BOUNDS) {
-                int tVal = (int) (AXIS_BYTE_MAX * (value / -AXIS_MAX));
-                if(tVal > AXIS_BYTE_MAX) {
-                    data[ID] = -AXIS_BYTE_MAX;
+                int tVal = (int) (AXIS_FLOAT_MAX * (value / -AXIS_MAX));
+                if(tVal > AXIS_FLOAT_MAX) {
+                    data[ID] = -AXIS_FLOAT_MAX;
                 } else {
-                    data[ID] = ((byte) -tVal);
+                    data[ID] = ((float) -tVal);
                 }
             } else {
                 data[ID] = 0x00;
@@ -413,9 +413,9 @@ public class Protocol extends AbstractNodeMain {
                     break;
                 }
 //                Log.d(TAG, "Sending Data");
-                //byte[] dataBytes = data.toBits();
+                //float[] datafloats = data.toBits();
                 //try {
-                //    socket_send.send(new DatagramPacket(dataBytes, dataBytes.length, ROBOT_ADDRESS, ROBOT_PORT_SEND));
+                //    socket_send.send(new DatagramPacket(datafloats, datafloats.length, ROBOT_ADDRESS, ROBOT_PORT_SEND));
                 //} catch(IOException e) {
                  //   e.printStackTrace();
                 //}
