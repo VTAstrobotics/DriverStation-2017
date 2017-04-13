@@ -16,11 +16,17 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import org.astrobotics.ds2017.HUDActivity;
+import org.ros.namespace.GraphName;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
+import org.ros.node.topic.Publisher;
+
+import std_msgs.String;
 
 /**
  * Implements the network protocol
  */
-public class Protocol {
+public class Protocol extends AbstractNodeMain {
 
     private static final int DEADMAN = KeyEvent.KEYCODE_BUTTON_L1;
     private static final int ROBOT_PORT_SEND = 6800, ROBOT_PORT_RECEIVE = 6850;
@@ -45,6 +51,12 @@ public class Protocol {
             throw new ExceptionInInitializerError(e);
         }
     }
+    @Override
+    public GraphName getDefaultNodeName() {
+        return GraphName.of("ds2017");
+    }
+
+
 
     public Protocol() throws IOException {
         // send socket creation
@@ -234,7 +246,7 @@ public class Protocol {
             return isDeadMansDown;
         }
 
-        public String toString() {
+        public java.lang.String toString() {
             return "Dead Man's: " + isDeadMansDown + " , Voltage: " + voltage;
         }
     }
@@ -327,69 +339,9 @@ public class Protocol {
             }
         }
 
-        // create the binary string with crc at the end
-        public byte[] toBits() {
-//            Log.d(TAG, "Data: " + Arrays.toString(data));
-            byte[] bits = new byte[11];
-
-            // do stuff to array
-            // 6 bytes for axes
-            bits[0] = data[ControlIDs.LTHUMBX];
-            bits[1] = data[ControlIDs.LTHUMBY];
-            bits[2] = data[ControlIDs.RTHUMBX];
-            bits[3] = data[ControlIDs.RTHUMBY];
-            bits[4] = data[ControlIDs.LTRIGGER];
-            bits[5] = data[ControlIDs.RTRIGGER];
-
-            // 2 bytes for buttons
-            byte buttons1 = 0, buttons2 = 0;
-            buttons2 += data[ControlIDs.LTHUMBBTN];
-            buttons2 = (byte) (buttons2 << 1);
-            buttons2 += data[ControlIDs.RTHUMBBTN];
-            bits[7] = buttons2;
-            buttons1 += data[ControlIDs.START];
-            buttons1 = (byte) (buttons1 << 1);
-            buttons1 += data[ControlIDs.BACK];
-            buttons1 = (byte) (buttons1 << 1);
-            buttons1 += data[ControlIDs.RB];
-            buttons1 = (byte) (buttons1 << 1);
-            buttons1 += data[ControlIDs.LB];
-            buttons1 = (byte) (buttons1 << 1);
-            buttons1 += data[ControlIDs.Y];
-            buttons1 = (byte) (buttons1 << 1);
-            buttons1 += data[ControlIDs.X];
-            buttons1 = (byte) (buttons1 << 1);
-            buttons1 += data[ControlIDs.B];
-            buttons1 = (byte) (buttons1 << 1);
-            buttons1 += data[ControlIDs.A];
-            bits[6] = buttons1;
-
-            // 1 byte for dpad
-            byte dpad = 0;
-            dpad += data[ControlIDs.DPAD_UP];
-            dpad = (byte) (dpad << 2);
-            dpad += data[ControlIDs.DPAD_DOWN];
-            dpad = (byte) (dpad << 2);
-            dpad += data[ControlIDs.DPAD_LEFT];
-            dpad = (byte) (dpad << 2);
-            dpad += data[ControlIDs.DPAD_RIGHT];
-            bits[8] = dpad;
-
-            // the 2 bit crc
-            byte[] dataBare = new byte[9];
-            for(int i = 0; i < dataBare.length; i++) {
-                dataBare[i] = bits[i];
-            }
-            short crc16 = (short) CRC16CCITT.crc16(dataBare);
-            bits[9] = (byte) (crc16 & 0xff);
-            bits[10] = (byte) ((crc16 >> 8) & 0xff);
-
-            return bits;
-        }
-
         // return a printable string, for debugging
-        public String toString() {
-            String str = "";
+        public java.lang.String toString() {
+            java.lang.String str = "";
             for(int i = 0; i < data.length; i++) {
                 str = str + "\n" + i + ": " + data[i];
             }
@@ -465,7 +417,12 @@ public class Protocol {
             }
         }
     }
-
+    @Override
+    public void onStart(final ConnectedNode connectedNode) {
+        //std_msgs.String._TYPE
+        final Publisher<String> publisher =
+                connectedNode.newPublisher("/robot/teleop", std_msgs.String._TYPE);
+    }
     // send the data from the queue in a thread
     private class SendWorker implements Runnable {
         @Override
@@ -482,12 +439,12 @@ public class Protocol {
                     break;
                 }
 //                Log.d(TAG, "Sending Data");
-                byte[] dataBytes = data.toBits();
-                try {
-                    socket_send.send(new DatagramPacket(dataBytes, dataBytes.length, ROBOT_ADDRESS, ROBOT_PORT_SEND));
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }
+                //byte[] dataBytes = data.toBits();
+                //try {
+                //    socket_send.send(new DatagramPacket(dataBytes, dataBytes.length, ROBOT_ADDRESS, ROBOT_PORT_SEND));
+                //} catch(IOException e) {
+                 //   e.printStackTrace();
+                //}
             }
         }
     }
