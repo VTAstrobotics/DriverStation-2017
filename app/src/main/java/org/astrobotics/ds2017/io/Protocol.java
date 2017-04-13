@@ -252,6 +252,7 @@ public class Protocol {
         // array for data, everything can be stored in byte,
         // though for buttons, only one bit will be used
         public byte data[];
+        public boolean buttonData[];
 
         // default constructor
         public ControlData() {
@@ -271,13 +272,13 @@ public class Protocol {
         // assumes they gave an ID of a button
         // returns true if button was changed, false if not
         public boolean setButton(int ID, boolean down) {
-            byte oldval = data[ID];
+            boolean oldval = buttonData[ID];
             if(down) {
-                data[ID] = 0x01;
+                buttonData[ID] = true;
             } else {
-                data[ID] = 0x00;
+                buttonData[ID] = false;
             }
-            return oldval != data[ID];
+            return oldval != buttonData[ID];
         }
 
         // assumes the id is for an axis
@@ -307,21 +308,21 @@ public class Protocol {
         public void setDpad(int eventCode, float value) {
             if(eventCode == MotionEvent.AXIS_HAT_X) {
                 if(value > DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_RIGHT] = 0x01;
+                    buttonData[ControlIDs.DPAD_RIGHT] = true;
                 } else if(value < -DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_LEFT] = 0x01;
+                    buttonData[ControlIDs.DPAD_LEFT] = true;
                 } else {
-                    data[ControlIDs.DPAD_LEFT] = 0x00;
-                    data[ControlIDs.DPAD_RIGHT] = 0x00;
+                    buttonData[ControlIDs.DPAD_LEFT] = false;
+                    buttonData[ControlIDs.DPAD_RIGHT] = false;
                 }
             } else if(eventCode == MotionEvent.AXIS_HAT_Y) {
                 if(value > DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_DOWN] = 0x01;
+                    buttonData[ControlIDs.DPAD_DOWN] = true;
                 } else if(value < -DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_UP] = 0x01;
+                    buttonData[ControlIDs.DPAD_UP] = true;
                 } else {
-                    data[ControlIDs.DPAD_UP] = 0x00;
-                    data[ControlIDs.DPAD_DOWN] = 0x00;
+                    buttonData[ControlIDs.DPAD_UP] = false;
+                    buttonData[ControlIDs.DPAD_DOWN] = false;
                 }
             }
         }
