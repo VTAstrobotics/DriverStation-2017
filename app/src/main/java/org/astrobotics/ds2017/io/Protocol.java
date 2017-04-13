@@ -352,32 +352,6 @@ public class Protocol extends AbstractNodeMain {
     private class PingWorker implements Runnable {
         @Override
         public void run() {
-            // variables
-            double lastTime = System.currentTimeMillis();
-            // while thread can send
-            while(!Thread.interrupted() && !socket_ping.isClosed()) {
-                if(System.currentTimeMillis() - lastTime > PING_FREQUENCY) {
-                    //ping
-                    // magic number
-                    byte[] b = {((byte) (216))};
-                    try {
-                        socket_send.send(new DatagramPacket(b, 1, ROBOT_ADDRESS, ROBOT_PING_SEND));
-                    } catch(IOException e) {
-                        e.printStackTrace();
-                    }
-                    //reset time
-                    lastTime = System.currentTimeMillis();
-                }
-                // sleep for majority of the remaining frequency
-                try {
-                    long timeToWait = (long) (lastTime + PING_FREQUENCY - System.currentTimeMillis());
-                    if(timeToWait > 0) {
-                        Thread.sleep(timeToWait);
-                    }
-                } catch(InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 

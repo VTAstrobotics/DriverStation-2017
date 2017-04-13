@@ -24,6 +24,7 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
+
 import java.nio.ByteBuffer;
 
 import std_msgs.String;
@@ -37,13 +38,6 @@ import std_msgs.String;
  *
  */
 public class Talker extends AbstractNodeMain {
-    //Creating a Byte Array
-    private byte[] bits = new byte[11];
-
-
-    //Copy method
-
-
     @Override
     public GraphName getDefaultNodeName() {
         return GraphName.of("ds2017");
@@ -51,6 +45,7 @@ public class Talker extends AbstractNodeMain {
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
+        //std_msgs.String._TYPE
         final Publisher<std_msgs.String> publisher =
                 connectedNode.newPublisher("/robot/teleop", std_msgs.String._TYPE);
         // This CancellableLoop will be canceled automatically when the node shuts
