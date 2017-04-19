@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import org.astrobotics.ds2017.io.MjpegView;
 import org.astrobotics.ds2017.io.Protocol;
-import org.astrobotics.ds2017.io.Talker;
 import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
@@ -139,10 +138,10 @@ public class HUDActivity extends RosActivity {
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        Talker talker = new Talker();
+        Protocol protocol = new Protocol();
 
-        NodeConfiguration talkerConfig = NodeConfiguration.newPrivate(getMasterUri());
-        nodeMainExecutor.execute(talker, talkerConfig);
+        NodeConfiguration protocolConfig = NodeConfiguration.newPrivate(getMasterUri());
+        nodeMainExecutor.execute(protocol, protocolConfig);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

@@ -328,7 +328,6 @@ public class Protocol extends AbstractNodeMain {
         public void run() {
         }
     }
-
     // recieve data from robot
     private class ReceiveWorker implements Runnable {
         @Override
