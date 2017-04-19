@@ -20,8 +20,7 @@ import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
-
-import std_msgs.String;
+import robot_msgs.Teleop;
 
 /**
  * Implements the network protocol
@@ -56,35 +55,10 @@ public class Protocol extends AbstractNodeMain {
         return GraphName.of("ds2017");
     }
 
-
-
-    public Protocol() throws IOException {
-        // send socket creation
-        socket_send = new DatagramSocket();
-        socket_send.setReuseAddress(true);
-        // instantiate sendqueue
-        sendQueue = new LinkedBlockingQueue<>();
-        // send thread instantaite and begin
-        sendThread = new Thread(new SendWorker(), "Send Thread");
-        sendThread.start();
-        // create the control data object
-        controlData = new ControlData();
-
-        // ping socket creation
-        socket_ping = new DatagramSocket();
-        socket_ping.setReuseAddress(true);
-        // ping thread instantiate and begin
-        pinging = new Thread(new PingWorker(), "Ping Thread");
-        pinging.start(); // TODO verify pinging works
-
-        // receive socket creation
-        socket_receive = new DatagramSocket();
-        socket_receive.setReuseAddress(true);
-        // receiving thread instantate and begin
-        receiving = new Thread(new ReceiveWorker(), "Receive Thread");
-//        receiving.start(); // TODO verify receiving works
-        // create the receive data
-        receiveData = new ReceiveData();
+    public void onStart(final ConnectedNode connectedNode) {
+        //std_msgs.String._TYPE
+        final Publisher<std_msgs.String> publisher =
+                connectedNode.newPublisher("/robot/teleop", robot_msgs.Teleop._TYPE);
     }
 
     public void startConnChecker(HUDActivity hudActivity) {
@@ -312,7 +286,7 @@ public class Protocol extends AbstractNodeMain {
                     data[ID] = ((float) -tVal);
                 }
             } else {
-                data[ID] = 0x00;
+                data[ID] = 0;
             }
         }
 
@@ -388,12 +362,6 @@ public class Protocol extends AbstractNodeMain {
                 receiveData.setVoltage(temp_bytes[1]);
             }
         }
-    }
-    @Override
-    public void onStart(final ConnectedNode connectedNode) {
-        //std_msgs.String._TYPE
-        final Publisher<String> publisher =
-                connectedNode.newPublisher("/robot/teleop", std_msgs.String._TYPE);
     }
     // send the data from the queue in a thread
     private class SendWorker implements Runnable {
