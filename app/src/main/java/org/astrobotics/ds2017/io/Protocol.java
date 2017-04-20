@@ -196,7 +196,7 @@ public class Protocol extends AbstractNodeMain {
         // if the dead man's switch is on or off
         private boolean isDeadMansDown;
         // holds the battery voltage
-        private float voltage = 0x0;
+        private float voltage = 0;
 
         public ReceiveData() {
             this.isDeadMansDown = false;
