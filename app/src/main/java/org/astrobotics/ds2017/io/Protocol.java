@@ -291,24 +291,24 @@ public class Protocol extends AbstractNodeMain {
         }
 
         // dpad comes as a float, but should be set to on or off
-        public void setDpad(int eventCode, float value) {//TODO: FixDPad
+        public void setDpad(int eventCode, float value) {
             if(eventCode == MotionEvent.AXIS_HAT_X) {
                 if(value > DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_RIGHT] = 0x01;
+                    buttonData[ControlIDs.DPAD_RIGHT] = true;
                 } else if(value < -DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_LEFT] = 0x01;
+                    buttonData[ControlIDs.DPAD_LEFT] = true;
                 } else {
-                    data[ControlIDs.DPAD_LEFT] = 0x00;
-                    data[ControlIDs.DPAD_RIGHT] = 0x00;
+                    buttonData[ControlIDs.DPAD_LEFT] = false;
+                    buttonData[ControlIDs.DPAD_RIGHT] = false;
                 }
             } else if(eventCode == MotionEvent.AXIS_HAT_Y) {
                 if(value > DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_DOWN] = 0x01;
+                    buttonData[ControlIDs.DPAD_DOWN] = true;
                 } else if(value < -DPAD_BOUNDS) {
-                    data[ControlIDs.DPAD_UP] = 0x01;
+                    buttonData[ControlIDs.DPAD_UP] = true;
                 } else {
-                    data[ControlIDs.DPAD_UP] = 0x00;
-                    data[ControlIDs.DPAD_DOWN] = 0x00;
+                    buttonData[ControlIDs.DPAD_UP] = false;
+                    buttonData[ControlIDs.DPAD_DOWN] = false;
                 }
             }
         }
@@ -367,85 +367,12 @@ public class Protocol extends AbstractNodeMain {
         @Override
         public void run() {
             ControlData data;
-            ControlData buttonData;
 
             // while the thread can send
             while(!Thread.interrupted() && !socket_send.isClosed()) {
                 // keep running if something is taken from stack
                 try {
-                    robot_msgs robo = publisher.newMessage();
-                    switch(ID) {
-                        case controlIDS.LTHUMBX :
-                            robo.setXLThumb(data[ID]));
-                            break;
-                        case controlIDS.LTHUMBY:
-                            robo.setYLThumb(data[ID]));
-                            break;
-                        case controlIDS.RTHUMBX:
-                            robo.setXRThumb(data[ID]));
-                            break;
-                        case controlIDS.RTHUMBY:
-                            robo.setYRThumb(data[ID]));
-                            break;
-                        case controlIDS.RTRIGGER:
-                            robo.setRTrig(data[ID]));
-                            break;
-                        case controlIDS.LTRIGGER:
-                            robo.setLTrig(data[ID]));
-                            break;
-                        case controlIDS.A:
-                            robo.setA(buttonData[ID]);
-                            break;
-                        case controlIDS.B:
-                            robo.setB(buttonData[ID]);
-                            break;
-                        case controlIDS.X:
-                            robo.setX(buttonData[ID]);
-                            break;
-                        case controlIDS.Y:
-                            robo.setY(buttonData[ID]);
-                            break;
-                        case controlIDS.LB:
-                            robo.setLb(buttonData[ID]);
-                            break;
-                        case controlIDS.RB:
-                            robo.setRb(buttonData[ID]);
-                            break;
-                        case controlIDS.BACK:
-                            robo.setBack(buttonData[ID]);
-                            break;
-                        case controlIDS.START:
-                            robo.setStart(buttonData[ID]);
-                            break;
-                        /*case controlIDS.XBOX:
-                           robo.setXbox(buttonData[ID]);
-                           break;
-                        case controlIDS.LTHUMBBTN:
-                           robo.setData(buttonData[ID]);
-                           break;
-                        case controlIDS.RTHUMBBTN:
-                           robo.setData(buttonData[ID]);
-                           break;
-                        case controlIDS.L2:
-                           robo.setData(buttonData[ID]);
-                           break;
-                        case controlIDS.R2:
-                           robo.setData(buttonData[ID]);
-                           break;
-                        case controlIDS.DPAD_UP:
-                           robo.setData(data[ID]);
-                           break;
-                        case controlIDS.DPAD_DOWN:
-                           break;
-                           robo.setData(data[ID]);
-                        case controlIDS.DPAD_LEFT:
-                           robo.setData(data[ID]);
-                           break;
-                        case controlIDS.DPAD_RIGHT:
-                           robo.setData(data[ID]);
-                           break;*/
-                    }
-
+                    data = sendQueue.take();
                 } catch(InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
