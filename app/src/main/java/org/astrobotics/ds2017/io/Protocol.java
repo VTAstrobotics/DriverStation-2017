@@ -155,6 +155,9 @@ public class Protocol extends AbstractNodeMain {
                 }
             }
         }
+        else{
+
+        }
     }
 
     public void sendData() {
@@ -373,6 +376,82 @@ public class Protocol extends AbstractNodeMain {
                 // keep running if something is taken from stack
                 try {
                     data = sendQueue.take();
+                    for(int i = 0; i < data.data.length; i++)
+                    {
+                        robot_msgs robo = publisher.newMessage();
+                        switch(i) {
+                            case ControlIDs.LTHUMBX :
+                                robo.setXLThumb(data.data[i]);
+                                break;
+                            case ControlIDs.LTHUMBY:
+                                robo.setYLThumb(data.data[i]);
+                                break;
+                            case ControlIDs.RTHUMBX:
+                                robo.setXRThumb(data.data[i]);
+                                break;
+                            case ControlIDs.RTHUMBY:
+                                robo.setYRThumb(data.data[i]);
+                                break;
+                            case ControlIDs.RTRIGGER:
+                                robo.setRTrig(data.data[i]);
+                                break;
+                            case ControlIDs.LTRIGGER:
+                                robo.setLTrig(data.data[i]);
+                                break;
+                            case ControlIDs.A:
+                                robo.setA(data.buttonData[i]);
+                                break;
+                            case ControlIDs.B:
+                                robo.setB(data.buttonData[i]);
+                                break;
+                            case ControlIDs.X:
+                                robo.setX(data.buttonData[i]);
+                                break;
+                            case ControlIDs.Y:
+                                robo.setY(data.buttonData[i]);
+                                break;
+                            case ControlIDs.LB:
+                                robo.setLb(data.buttonData[i]);
+                                break;
+                            case ControlIDs.RB:
+                                robo.setRb(data.buttonData[i]);
+                                break;
+                            case ControlIDs.BACK:
+                                robo.setBack(data.buttonData[i]);
+                                break;
+                            case ControlIDs.START:
+                                robo.setStart(data.buttonData[i]);
+                                break;
+                        /*case ControlIDs.XBOX:
+                           robo.setXbox(data.buttonData[i]);
+                           break;
+                        case ControlIDs.LTHUMBBTN:
+                           robo.setData(data.buttonData[i]);
+                           break;
+                        case ControlIDs.RTHUMBBTN:
+                           robo.setData(data.buttonData[i]);
+                           break;
+                        case ControlIDs.L2:
+                           robo.setData(data.buttonData[i]);
+                           break;
+                        case ControlIDs.R2:
+                           robo.setData(data.buttonData[i]);
+                           break;
+                        case ControlIDs.DPAD_UP:
+                           robo.setData(data.data[i]);
+                           break;
+                        case ControlIDs.DPAD_DOWN:
+                           break;
+                           robo.setData(data.data[i]);
+                        case ControlIDs.DPAD_LEFT:
+                           robo.setData(data.data[i]);
+                           break;
+                        case ControlIDs.DPAD_RIGHT:
+                           robo.setData(data.data[i]);
+                           break;*/
+                        }
+                    }
+
                 } catch(InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
