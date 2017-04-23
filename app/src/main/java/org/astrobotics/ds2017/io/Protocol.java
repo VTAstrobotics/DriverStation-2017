@@ -413,47 +413,47 @@ public class Protocol extends AbstractNodeMain {
                     }
                     for(int i = 0; i < data.buttonData.length; i++)
                     {
-                    switch(i) {
-                    case ControlIDs.A:
-                        robo.setA(data.buttonData[i]);
-                        break;
-                    case ControlIDs.B:
-                        robo.setB(data.buttonData[i]);
-                        break;
-                    case ControlIDs.X:
-                        robo.setX(data.buttonData[i]);
-                        break;
-                    case ControlIDs.Y:
-                        robo.setY(data.buttonData[i]);
-                        break;
-                    case ControlIDs.LB:
-                        robo.setLb(data.buttonData[i]);
-                        break;
-                    case ControlIDs.RB:
-                        robo.setRb(data.buttonData[i]);
-                        break;
-                    case ControlIDs.BACK:
-                        robo.setBack(data.buttonData[i]);
-                        break;
-                    case ControlIDs.START:
-                        robo.setStart(data.buttonData[i]);
-                        break;
-                    case ControlIDs.XBOX:
-                        robo.setXbox(data.buttonData[i]);
-                        break;
-                    case ControlIDs.LTHUMBBTN:
-                        robo.setData(data.buttonData[i]);
-                        break;
-                    case ControlIDs.RTHUMBBTN:
-                        robo.setData(data.buttonData[i]);
-                        break;
-                    case ControlIDs.L2:
-                        robo.setData(data.buttonData[i]);
-                        break;
-                    case ControlIDs.R2:
-                        robo.setData(data.buttonData[i]);
-                        break;
-                        }
+                        switch(i) {
+                        case ControlIDs.A:
+                            robo.setA(data.buttonData[i]);
+                            break;
+                        case ControlIDs.B:
+                            robo.setB(data.buttonData[i]);
+                            break;
+                        case ControlIDs.X:
+                            robo.setX(data.buttonData[i]);
+                            break;
+                        case ControlIDs.Y:
+                            robo.setY(data.buttonData[i]);
+                            break;
+                        case ControlIDs.LB:
+                            robo.setLb(data.buttonData[i]);
+                            break;
+                        case ControlIDs.RB:
+                            robo.setRb(data.buttonData[i]);
+                            break;
+                        case ControlIDs.BACK:
+                            robo.setBack(data.buttonData[i]);
+                            break;
+                        case ControlIDs.START:
+                            robo.setStart(data.buttonData[i]);
+                            break;
+                        case ControlIDs.XBOX:
+                            robo.setXbox(data.buttonData[i]);
+                            break;
+                        case ControlIDs.LTHUMBBTN:
+                            robo.setData(data.buttonData[i]);
+                            break;
+                        case ControlIDs.RTHUMBBTN:
+                            robo.setData(data.buttonData[i]);
+                            break;
+                        case ControlIDs.L2:
+                            robo.setData(data.buttonData[i]);
+                            break;
+                        case ControlIDs.R2:
+                            robo.setData(data.buttonData[i]);
+                            break;
+                            }
                       }
                 } catch(InterruptedException e) {
                     Thread.currentThread().interrupt();
