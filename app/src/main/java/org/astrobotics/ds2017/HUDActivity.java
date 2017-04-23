@@ -81,16 +81,8 @@ public class HUDActivity extends RosActivity {
                 }
             }
         });
-
-        try {
             protocol = new Protocol();
             protocol.startConnChecker(this);
-        } catch(IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error initializing network protocol", Toast.LENGTH_LONG).show();
-            finish();
-        }
-
         // Initialize indicators
         initIndicator(R.id.robot_status, R.drawable.ic_robot_status);
         initIndicator(R.id.controller_status, R.drawable.ic_controller_status);

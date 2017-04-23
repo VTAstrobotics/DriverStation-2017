@@ -22,6 +22,8 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import robot_msgs.Teleop;
 
+import static android.content.ContentValues.TAG;
+
 /**
  * Implements the network protocol
  */
@@ -54,11 +56,9 @@ public class Protocol extends AbstractNodeMain {
     public GraphName getDefaultNodeName() {
         return GraphName.of("ds2017");
     }
-
+    @Override
     public void onStart(final ConnectedNode connectedNode) {
-        //std_msgs.String._TYPE
-        final Publisher<std_msgs.String> publisher =
-                connectedNode.newPublisher("/robot/teleop", robot_msgs.Teleop._TYPE);
+        this.connectedNode = connectedNode;
     }
 
     public void startConnChecker(HUDActivity hudActivity) {
@@ -370,12 +370,14 @@ public class Protocol extends AbstractNodeMain {
         @Override
         public void run() {
             ControlData data;
-
+            //TODO: Fnd a way to instantiate onStart method from the parent class of protocol for connectedNode
+            final Publisher<robot_msgs.Teleop> publisher =
+                    connectedNode.newPublisher("/robot/teleop", robot_msgs.Teleop._TYPE);
             // while the thread can send
-            while(!Thread.interrupted() && !socket_send.isClosed()) {
-                // keep running if something is taken from stack
-                try {
-                    robot_msgs robo = publisher.newMessage();
+            while(!Thread.interrupted()) {
+                    //
+                    robot_msgs.Teleop robo = publisher.newMessage();
+                    //Sets decissions that set the data
                     for(int i = 0; i < data.data.length; i++)
                     {
                         switch(i) {
@@ -397,7 +399,7 @@ public class Protocol extends AbstractNodeMain {
                             case ControlIDs.LTRIGGER:
                                 robo.setLTrig(data.data[i]);
                                 break;
-                            case ControlIDs.DPAD_UP:
+                            /*case ControlIDs.DPAD_UP:
                                 robo.setData(data.data[i]);
                                 break;
                             case ControlIDs.DPAD_DOWN:
@@ -408,7 +410,7 @@ public class Protocol extends AbstractNodeMain {
                                 break;
                             case ControlIDs.DPAD_RIGHT:
                                 robo.setData(data.data[i]);
-                                break;
+                                break;*/
                         }
                     }
                     for(int i = 0; i < data.buttonData.length; i++)
@@ -438,7 +440,7 @@ public class Protocol extends AbstractNodeMain {
                         case ControlIDs.START:
                             robo.setStart(data.buttonData[i]);
                             break;
-                        case ControlIDs.XBOX:
+                        /*case ControlIDs.XBOX:
                             robo.setXbox(data.buttonData[i]);
                             break;
                         case ControlIDs.LTHUMBBTN:
@@ -452,20 +454,13 @@ public class Protocol extends AbstractNodeMain {
                             break;
                         case ControlIDs.R2:
                             robo.setData(data.buttonData[i]);
-                            break;
+                            break;*/
                             }
                       }
-                } catch(InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-//                Log.d(TAG, "Sending Data");
-                //float[] datafloats = data.toBits();
-                //try {
-                //    socket_send.send(new DatagramPacket(datafloats, datafloats.length, ROBOT_ADDRESS, ROBOT_PORT_SEND));
-                //} catch(IOException e) {
-                 //   e.printStackTrace();
-                //}
+                    //Adds logging messsage to make sure that it is sending data
+                    Log.d(TAG, "Sending Data");
+                    //send data
+                    publisher.publish(robo);
             }
         }
     }
