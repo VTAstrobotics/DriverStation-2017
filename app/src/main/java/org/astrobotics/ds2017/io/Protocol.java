@@ -22,19 +22,18 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import robot_msgs.Teleop;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * Implements the network protocol
  */
 public class Protocol extends AbstractNodeMain {
-
+    private static final String TAG = "ds2017";
     private static final int DEADMAN = KeyEvent.KEYCODE_BUTTON_L1;
     private static final int ROBOT_PORT_SEND = 6800, ROBOT_PORT_RECEIVE = 6850;
     private static final int ROBOT_PING_SEND = 6900;
     private static final int PING_FREQUENCY = 200; // 5 times per second
     private static final int CONNCHECK_FREQUENCY = 2000; // every 2 seconds
     private static InetAddress ROBOT_ADDRESS = null;
+    private static String TELEOP_TOPIC = "/robot/teleop";
 
     private DatagramSocket socket_send, socket_ping, socket_receive;
     private LinkedBlockingQueue<ControlData> sendQueue;
@@ -43,7 +42,9 @@ public class Protocol extends AbstractNodeMain {
     // instance of current control data
     private ControlData controlData;
     // instance of most recent data received
-    private ReceiveData receiveData;
+//    private ReceiveData receiveData;
+
+    private Publisher<robot_msgs.Teleop> publisher;
 
     static {
         try {
@@ -52,13 +53,15 @@ public class Protocol extends AbstractNodeMain {
             throw new ExceptionInInitializerError(e);
         }
     }
+
     @Override
     public GraphName getDefaultNodeName() {
         return GraphName.of("ds2017");
     }
+
     @Override
     public void onStart(final ConnectedNode connectedNode) {
-        this.connectedNode = connectedNode;
+        publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
     }
 
     public void startConnChecker(HUDActivity hudActivity) {
@@ -68,6 +71,7 @@ public class Protocol extends AbstractNodeMain {
         connCheck = new Thread(new ConnCheckWorker(hudActivity), "Connectivity Check Thread");
         connCheck.start();
     }
+
     //Function for setting the stick given the axis and the value
     public void setStick(int axis, float value) {
         switch(axis) {
@@ -97,6 +101,8 @@ public class Protocol extends AbstractNodeMain {
                 break;
             default:
         }
+        // always send data for axis changes
+        sendData();
     }
 
     // for pressing buttons
@@ -127,18 +133,18 @@ public class Protocol extends AbstractNodeMain {
             case KeyEvent.KEYCODE_BUTTON_START:
                 wasChanged = controlData.setButton(ControlIDs.START, pressed);
                 break;
-            case KeyEvent.KEYCODE_BUTTON_MODE:
-                wasChanged = controlData.setButton(ControlIDs.XBOX, pressed);
-                break;
+//            case KeyEvent.KEYCODE_BUTTON_MODE:
+//                wasChanged = controlData.setButton(ControlIDs.XBOX, pressed);
+//                break;
             case KeyEvent.KEYCODE_BUTTON_THUMBL:
                 wasChanged = controlData.setButton(ControlIDs.LTHUMBBTN, pressed);
                 break;
             case KeyEvent.KEYCODE_BUTTON_THUMBR:
                 wasChanged = controlData.setButton(ControlIDs.RTHUMBBTN, pressed);
                 break;
-            case KeyEvent.KEYCODE_BUTTON_L2:
-                wasChanged = controlData.setButton(ControlIDs.L2, pressed);
-                break;
+//            case KeyEvent.KEYCODE_BUTTON_L2:
+//                wasChanged = controlData.setButton(ControlIDs.L2, pressed);
+//                break;
             default:
                 return;
         }
@@ -146,17 +152,14 @@ public class Protocol extends AbstractNodeMain {
         // send the data on change
         if(wasChanged) {
             sendData();
-            // send twice if the button was released
+            // probably don't need the stuff below
+/*            // send twice if the button was released
             if(!pressed) {
                 sendData();
                 // send again if the button released was deadman
                 if(keycode == DEADMAN) {
                     sendData();
-                }
-            }
-        }
-        else{
-
+                }*/
         }
     }
 
@@ -164,36 +167,32 @@ public class Protocol extends AbstractNodeMain {
         sendQueue.offer(new ControlData(controlData));
     }
 
-    // ***NOTE*** change size if IDs are changed
     private static class ControlIDs {
+        // Axes
         public static final int LTHUMBX = 0;
         public static final int LTHUMBY = 1;
         public static final int RTHUMBX = 2;
         public static final int RTHUMBY = 3;
         public static final int RTRIGGER = 4;
         public static final int LTRIGGER = 5;
-        public static final int A = 6;
-        public static final int B = 7;
-        public static final int X = 8;
-        public static final int Y = 9;
-        public static final int LB = 10;
-        public static final int RB = 11;
-        public static final int BACK = 12;
-        public static final int START = 13;
-        public static final int XBOX = 14;
-        public static final int LTHUMBBTN = 15;
-        public static final int RTHUMBBTN = 16;
-        public static final int L2 = 17;
-        public static final int R2 = 18;
-        public static final int DPAD_UP = 19;
-        public static final int DPAD_DOWN = 20;
-        public static final int DPAD_LEFT = 21;
-        public static final int DPAD_RIGHT = 22;
-        public static final int SIZE = 23;
+        public static final int NUM_AXES = 6;
+
+        // Buttons
+        public static final int A = 0;
+        public static final int B = 1;
+        public static final int X = 2;
+        public static final int Y = 3;
+        public static final int LB = 4;
+        public static final int RB = 5;
+        public static final int BACK = 6;
+        public static final int START = 7;
+        public static final int LTHUMBBTN = 8;
+        public static final int RTHUMBBTN = 9;
+        public static final int NUM_BTNS = 10;
     }
 
     // holds details given from the robot to DS
-    private static class ReceiveData {
+/*    private static class ReceiveData {
         public static final int SIZE = 4;
 
         // if the dead man's switch is on or off
@@ -226,26 +225,27 @@ public class Protocol extends AbstractNodeMain {
         public java.lang.String toString() {
             return "Dead Man's: " + isDeadMansDown + " , Voltage: " + voltage;
         }
-    }
+    }*/
 
     private static class ControlData {
-        // for if the axis doesn't return to exactly 0 used + or -
-        private static final double AXIS_BOUNDS = 0.1;
+        // for axis dead zone
+        private static final float AXIS_BOUNDS = 0.1f;
         // max/min axis values can be
-        private static final double AXIS_MAX = 1.0;
+        private static final float AXIS_MAX = 1.0f;
         // max value float should be
         private static final int AXIS_FLOAT_MAX = 100;
-        // for the dead zone in the dpad
+        // for dpad dead zone
         private static final double DPAD_BOUNDS = 0.1;
 
         // array for data, everything can be stored in float,
         // though for buttons, only one bit will be used
-        public float data[];
-        public boolean buttonData[];
+        public float data[] = new float[ControlIDs.NUM_AXES];
+        public boolean buttonData[] = new boolean[ControlIDs.NUM_BTNS];
+        public int dpad_x = 0;
+        public int dpad_y = 0;
 
         // default constructor
         public ControlData() {
-            this.data = new float[ControlIDs.SIZE];
         }
 
         // copy constructor
@@ -272,24 +272,21 @@ public class Protocol extends AbstractNodeMain {
 
         // assumes the id is for an axis
         // takes value from -1 to 1 and converts to specified range
-        public void setAxis(int ID, double value) {
+        public void setAxis(int ID, float value) {
             if(value > AXIS_BOUNDS) {
-                // truncate and make for 0 to 100
-                int tVal = (int) (AXIS_FLOAT_MAX * (value / AXIS_MAX));
-                if(tVal > AXIS_FLOAT_MAX) {
-                    data[ID] = AXIS_FLOAT_MAX;
-                } else {
-                    data[ID] = ((float) tVal);
+                // cap at 1.0
+                if(value > AXIS_MAX) {
+                    value = AXIS_MAX;
                 }
+                data[ID] = value;
             } else if(value < -AXIS_BOUNDS) {
-                int tVal = (int) (AXIS_FLOAT_MAX * (value / -AXIS_MAX));
-                if(tVal > AXIS_FLOAT_MAX) {
-                    data[ID] = -AXIS_FLOAT_MAX;
-                } else {
-                    data[ID] = ((float) -tVal);
+                // cap at -1.0
+                if(value < -AXIS_MAX) {
+                    value = -AXIS_FLOAT_MAX;
                 }
+                data[ID] = value;
             } else {
-                data[ID] = 0;
+                data[ID] = 0.0f;
             }
         }
 
@@ -297,31 +294,34 @@ public class Protocol extends AbstractNodeMain {
         public void setDpad(int eventCode, float value) {
             if(eventCode == MotionEvent.AXIS_HAT_X) {
                 if(value > DPAD_BOUNDS) {
-                    buttonData[ControlIDs.DPAD_RIGHT] = true;
+                    dpad_x = 1;
                 } else if(value < -DPAD_BOUNDS) {
-                    buttonData[ControlIDs.DPAD_LEFT] = true;
+                    dpad_x = -1;
                 } else {
-                    buttonData[ControlIDs.DPAD_LEFT] = false;
-                    buttonData[ControlIDs.DPAD_RIGHT] = false;
+                    dpad_x = 0;
                 }
             } else if(eventCode == MotionEvent.AXIS_HAT_Y) {
                 if(value > DPAD_BOUNDS) {
-                    buttonData[ControlIDs.DPAD_DOWN] = true;
+                    dpad_y = 1;
                 } else if(value < -DPAD_BOUNDS) {
-                    buttonData[ControlIDs.DPAD_UP] = true;
+                    dpad_y = -1;
                 } else {
-                    buttonData[ControlIDs.DPAD_UP] = false;
-                    buttonData[ControlIDs.DPAD_DOWN] = false;
+                    dpad_y = 0;
                 }
             }
         }
 
         // return a printable string, for debugging
-        public java.lang.String toString() {
-            java.lang.String str = "";
+        public String toString() {
+            String str = "Axes => ";
             for(int i = 0; i < data.length; i++) {
-                str = str + "\n" + i + ": " + data[i];
+                str += i + ": " + data[i] + ", ";
             }
+            str += "Buttons => ";
+            for(int i = 0; i < buttonData.length; i++) {
+                str += i + ": " + buttonData[i] + ", ";
+            }
+            str += "Dpad => x: " + dpad_x + ", y: " + dpad_y;
             return str;
         }
     }
@@ -329,14 +329,18 @@ public class Protocol extends AbstractNodeMain {
     private class PingWorker implements Runnable {
         @Override
         public void run() {
+            // TODO something for pinging in loop
+            // doesn't need to be a thread, can use ROS cancellable loop or similar
         }
     }
+
     // recieve data from robot
     private class ReceiveWorker implements Runnable {
         @Override
         public void run() {
             // initialize socket on dedicated thread
-            try {
+            // TODO handle receiving Status msg - subscriber in onStart
+/*            try {
                 socket_receive.bind(new InetSocketAddress(ROBOT_PORT_RECEIVE));
             } catch(SocketException e) {
                 e.printStackTrace();
@@ -362,105 +366,105 @@ public class Protocol extends AbstractNodeMain {
                 // handle the actual data
                 receiveData.setDeadMansDown(temp_bytes[0] != 0);
                 receiveData.setVoltage(temp_bytes[1]);
-            }
+            }*/
         }
     }
+
     // send the data from the queue in a thread
     private class SendWorker implements Runnable {
         @Override
         public void run() {
-            ControlData data;
-            //TODO: Fnd a way to instantiate onStart method from the parent class of protocol for connectedNode
-            final Publisher<robot_msgs.Teleop> publisher =
-                    connectedNode.newPublisher("/robot/teleop", robot_msgs.Teleop._TYPE);
             // while the thread can send
             while(!Thread.interrupted()) {
-                    //
-                    robot_msgs.Teleop robo = publisher.newMessage();
-                    //Sets decissions that set the data
-                    for(int i = 0; i < data.data.length; i++)
-                    {
-                        switch(i) {
-                            case ControlIDs.LTHUMBX :
-                                robo.setXLThumb(data.data[i]);
-                                break;
-                            case ControlIDs.LTHUMBY:
-                                robo.setYLThumb(data.data[i]);
-                                break;
-                            case ControlIDs.RTHUMBX:
-                                robo.setXRThumb(data.data[i]);
-                                break;
-                            case ControlIDs.RTHUMBY:
-                                robo.setYRThumb(data.data[i]);
-                                break;
-                            case ControlIDs.RTRIGGER:
-                                robo.setRTrig(data.data[i]);
-                                break;
-                            case ControlIDs.LTRIGGER:
-                                robo.setLTrig(data.data[i]);
-                                break;
-                            /*case ControlIDs.DPAD_UP:
-                                robo.setData(data.data[i]);
-                                break;
-                            case ControlIDs.DPAD_DOWN:
-                                break;
-                                robo.setData(data.data[i]);
-                            case ControlIDs.DPAD_LEFT:
-                                robo.setData(data.data[i]);
-                                break;
-                            case ControlIDs.DPAD_RIGHT:
-                                robo.setData(data.data[i]);
-                                break;*/
-                        }
-                    }
-                    for(int i = 0; i < data.buttonData.length; i++)
-                    {
-                        switch(i) {
-                        case ControlIDs.A:
-                            robo.setA(data.buttonData[i]);
+                robot_msgs.Teleop robo = publisher.newMessage();
+                // Set axes
+                for(int i = 0; i < controlData.data.length; i++)
+                {
+                    switch(i) {
+                        case ControlIDs.LTHUMBX :
+                            robo.setXLThumb(controlData.data[i]);
                             break;
-                        case ControlIDs.B:
-                            robo.setB(data.buttonData[i]);
+                        case ControlIDs.LTHUMBY:
+                            robo.setYLThumb(controlData.data[i]);
                             break;
-                        case ControlIDs.X:
-                            robo.setX(data.buttonData[i]);
+                        case ControlIDs.RTHUMBX:
+                            robo.setXRThumb(controlData.data[i]);
                             break;
-                        case ControlIDs.Y:
-                            robo.setY(data.buttonData[i]);
+                        case ControlIDs.RTHUMBY:
+                            robo.setYRThumb(controlData.data[i]);
                             break;
-                        case ControlIDs.LB:
-                            robo.setLb(data.buttonData[i]);
+                        case ControlIDs.RTRIGGER:
+                            robo.setRTrig(controlData.data[i]);
                             break;
-                        case ControlIDs.RB:
-                            robo.setRb(data.buttonData[i]);
+                        case ControlIDs.LTRIGGER:
+                            robo.setLTrig(controlData.data[i]);
                             break;
-                        case ControlIDs.BACK:
-                            robo.setBack(data.buttonData[i]);
+                        /*case ControlIDs.DPAD_UP:
+                            robo.setData(data.data[i]);
                             break;
-                        case ControlIDs.START:
-                            robo.setStart(data.buttonData[i]);
+                        case ControlIDs.DPAD_DOWN:
                             break;
-                        /*case ControlIDs.XBOX:
-                            robo.setXbox(data.buttonData[i]);
+                            robo.setData(data.data[i]);
+                        case ControlIDs.DPAD_LEFT:
+                            robo.setData(data.data[i]);
                             break;
-                        case ControlIDs.LTHUMBBTN:
-                            robo.setData(data.buttonData[i]);
-                            break;
-                        case ControlIDs.RTHUMBBTN:
-                            robo.setData(data.buttonData[i]);
-                            break;
-                        case ControlIDs.L2:
-                            robo.setData(data.buttonData[i]);
-                            break;
-                        case ControlIDs.R2:
-                            robo.setData(data.buttonData[i]);
+                        case ControlIDs.DPAD_RIGHT:
+                            robo.setData(data.data[i]);
                             break;*/
-                            }
-                      }
-                    //Adds logging messsage to make sure that it is sending data
-                    Log.d(TAG, "Sending Data");
-                    //send data
-                    publisher.publish(robo);
+                    }
+                }
+                // Set buttons
+                for(int i = 0; i < controlData.buttonData.length; i++)
+                {
+                    switch(i) {
+                    case ControlIDs.A:
+                        robo.setA(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.B:
+                        robo.setB(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.X:
+                        robo.setX(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.Y:
+                        robo.setY(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.LB:
+                        robo.setLb(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.RB:
+                        robo.setRb(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.BACK:
+                        robo.setBack(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.START:
+                        robo.setStart(controlData.buttonData[i]);
+                        break;
+//                    case ControlIDs.XBOX:
+//                        robo.setXbox(data.buttonData[i]);
+//                        break;
+                    case ControlIDs.LTHUMBBTN:
+                        robo.setLThumb(controlData.buttonData[i]);
+                        break;
+                    case ControlIDs.RTHUMBBTN:
+                        robo.setRThumb(controlData.buttonData[i]);
+                        break;
+//                    case ControlIDs.L2:
+//                        robo.setData(data.buttonData[i]);
+//                        break;
+//                    case ControlIDs.R2:
+//                        robo.setData(data.buttonData[i]);
+//                        break;
+                    }
+                }
+                // Set dpad
+                robo.setDpX((byte)controlData.dpad_x);
+                robo.setDpY((byte)controlData.dpad_y);
+                //Adds logging messsage to make sure that it is sending data
+                Log.d(TAG, "Sending Data");
+                //send data
+                publisher.publish(robo);
             }
         }
     }

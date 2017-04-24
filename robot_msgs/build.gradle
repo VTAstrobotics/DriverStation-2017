@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'idea'
 
 def genDir = "${buildDir}/generated-src/main/java"
 
@@ -28,3 +29,5 @@ dependencies {
     compile 'org.ros.rosjava_messages:geometry_msgs:+'
     compile 'org.ros.rosjava_bootstrap:message_generation:0.3.0'
 }
+
+idea.module.sourceDirs += file(genDir)
