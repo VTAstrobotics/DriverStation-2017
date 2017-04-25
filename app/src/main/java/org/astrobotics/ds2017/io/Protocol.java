@@ -36,15 +36,15 @@ public class Protocol extends AbstractNodeMain {
     private static String TELEOP_TOPIC = "/robot/teleop";
 
     private DatagramSocket socket_send, socket_ping, socket_receive;
-    private LinkedBlockingQueue<ControlData> sendQueue;
+//    private LinkedBlockingQueue<ControlData> sendQueue = new LinkedBlockingQueue<>();
     private Thread sendThread, pinging, receiving, connCheck;
 
     // instance of current control data
-    private ControlData controlData;
+    private ControlData controlData = new ControlData();
     // instance of most recent data received
 //    private ReceiveData receiveData;
 
-    private Publisher<robot_msgs.Teleop> publisher;
+    private volatile Publisher<robot_msgs.Teleop> publisher;
 
     static {
         try {
@@ -52,6 +52,10 @@ public class Protocol extends AbstractNodeMain {
         } catch(UnknownHostException e) {
             throw new ExceptionInInitializerError(e);
         }
+    }
+
+    public Protocol() {
+//        sendThread = new Thread(new SendWorker(), "Send Thread");
     }
 
     @Override
@@ -62,6 +66,7 @@ public class Protocol extends AbstractNodeMain {
     @Override
     public void onStart(final ConnectedNode connectedNode) {
         publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
+//        sendThread.start();
     }
 
     public void startConnChecker(HUDActivity hudActivity) {
@@ -149,6 +154,8 @@ public class Protocol extends AbstractNodeMain {
                 return;
         }
 
+        Log.d("ds2017", "sendButton " + wasChanged);
+
         // send the data on change
         if(wasChanged) {
             sendData();
@@ -164,7 +171,97 @@ public class Protocol extends AbstractNodeMain {
     }
 
     public void sendData() {
-        sendQueue.offer(new ControlData(controlData));
+//        sendQueue.offer(new ControlData(controlData));
+        ControlData data = controlData;
+        robot_msgs.Teleop robo = publisher.newMessage();
+        // Set axes
+        for(int i = 0; i < data.data.length; i++)
+        {
+            switch(i) {
+                case ControlIDs.LTHUMBX :
+                    robo.setXLThumb(data.data[i]);
+                    break;
+                case ControlIDs.LTHUMBY:
+                    robo.setYLThumb(data.data[i]);
+                    break;
+                case ControlIDs.RTHUMBX:
+                    robo.setXRThumb(data.data[i]);
+                    break;
+                case ControlIDs.RTHUMBY:
+                    robo.setYRThumb(data.data[i]);
+                    break;
+                case ControlIDs.RTRIGGER:
+                    robo.setRTrig(data.data[i]);
+                    break;
+                case ControlIDs.LTRIGGER:
+                    robo.setLTrig(data.data[i]);
+                    break;
+                        /*case ControlIDs.DPAD_UP:
+                            robo.setData(data.data[i]);
+                            break;
+                        case ControlIDs.DPAD_DOWN:
+                            break;
+                            robo.setData(data.data[i]);
+                        case ControlIDs.DPAD_LEFT:
+                            robo.setData(data.data[i]);
+                            break;
+                        case ControlIDs.DPAD_RIGHT:
+                            robo.setData(data.data[i]);
+                            break;*/
+            }
+        }
+        // Set buttons
+        for(int i = 0; i < data.buttonData.length; i++)
+        {
+            switch(i) {
+                case ControlIDs.A:
+                    robo.setA(data.buttonData[i]);
+                    break;
+                case ControlIDs.B:
+                    robo.setB(data.buttonData[i]);
+                    break;
+                case ControlIDs.X:
+                    robo.setX(data.buttonData[i]);
+                    break;
+                case ControlIDs.Y:
+                    robo.setY(data.buttonData[i]);
+                    break;
+                case ControlIDs.LB:
+                    robo.setLb(data.buttonData[i]);
+                    break;
+                case ControlIDs.RB:
+                    robo.setRb(data.buttonData[i]);
+                    break;
+                case ControlIDs.BACK:
+                    robo.setBack(data.buttonData[i]);
+                    break;
+                case ControlIDs.START:
+                    robo.setStart(data.buttonData[i]);
+                    break;
+//                    case ControlIDs.XBOX:
+//                        robo.setXbox(data.buttonData[i]);
+//                        break;
+                case ControlIDs.LTHUMBBTN:
+                    robo.setLThumb(data.buttonData[i]);
+                    break;
+                case ControlIDs.RTHUMBBTN:
+                    robo.setRThumb(data.buttonData[i]);
+                    break;
+//                    case ControlIDs.L2:
+//                        robo.setData(data.buttonData[i]);
+//                        break;
+//                    case ControlIDs.R2:
+//                        robo.setData(data.buttonData[i]);
+//                        break;
+            }
+        }
+        // Set dpad
+        robo.setDpX((byte)data.dpad_x);
+        robo.setDpY((byte)data.dpad_y);
+        //Adds logging messsage to make sure that it is sending data
+        Log.d(TAG, "Sending Data");
+        //send data
+        publisher.publish(robo);
     }
 
     private static class ControlIDs {
@@ -371,33 +468,40 @@ public class Protocol extends AbstractNodeMain {
     }
 
     // send the data from the queue in a thread
-    private class SendWorker implements Runnable {
+/*    private class SendWorker implements Runnable {
         @Override
         public void run() {
+            ControlData data;
             // while the thread can send
             while(!Thread.interrupted()) {
+                try {
+                    data = sendQueue.take();
+                } catch(InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
                 robot_msgs.Teleop robo = publisher.newMessage();
                 // Set axes
-                for(int i = 0; i < controlData.data.length; i++)
+                for(int i = 0; i < data.data.length; i++)
                 {
                     switch(i) {
                         case ControlIDs.LTHUMBX :
-                            robo.setXLThumb(controlData.data[i]);
+                            robo.setXLThumb(data.data[i]);
                             break;
                         case ControlIDs.LTHUMBY:
-                            robo.setYLThumb(controlData.data[i]);
+                            robo.setYLThumb(data.data[i]);
                             break;
                         case ControlIDs.RTHUMBX:
-                            robo.setXRThumb(controlData.data[i]);
+                            robo.setXRThumb(data.data[i]);
                             break;
                         case ControlIDs.RTHUMBY:
-                            robo.setYRThumb(controlData.data[i]);
+                            robo.setYRThumb(data.data[i]);
                             break;
                         case ControlIDs.RTRIGGER:
-                            robo.setRTrig(controlData.data[i]);
+                            robo.setRTrig(data.data[i]);
                             break;
                         case ControlIDs.LTRIGGER:
-                            robo.setLTrig(controlData.data[i]);
+                            robo.setLTrig(data.data[i]);
                             break;
                         /*case ControlIDs.DPAD_UP:
                             robo.setData(data.data[i]);
@@ -411,44 +515,44 @@ public class Protocol extends AbstractNodeMain {
                         case ControlIDs.DPAD_RIGHT:
                             robo.setData(data.data[i]);
                             break;*/
-                    }
+                    /*}
                 }
                 // Set buttons
-                for(int i = 0; i < controlData.buttonData.length; i++)
+                for(int i = 0; i < data.buttonData.length; i++)
                 {
                     switch(i) {
                     case ControlIDs.A:
-                        robo.setA(controlData.buttonData[i]);
+                        robo.setA(data.buttonData[i]);
                         break;
                     case ControlIDs.B:
-                        robo.setB(controlData.buttonData[i]);
+                        robo.setB(data.buttonData[i]);
                         break;
                     case ControlIDs.X:
-                        robo.setX(controlData.buttonData[i]);
+                        robo.setX(data.buttonData[i]);
                         break;
                     case ControlIDs.Y:
-                        robo.setY(controlData.buttonData[i]);
+                        robo.setY(data.buttonData[i]);
                         break;
                     case ControlIDs.LB:
-                        robo.setLb(controlData.buttonData[i]);
+                        robo.setLb(data.buttonData[i]);
                         break;
                     case ControlIDs.RB:
-                        robo.setRb(controlData.buttonData[i]);
+                        robo.setRb(data.buttonData[i]);
                         break;
                     case ControlIDs.BACK:
-                        robo.setBack(controlData.buttonData[i]);
+                        robo.setBack(data.buttonData[i]);
                         break;
                     case ControlIDs.START:
-                        robo.setStart(controlData.buttonData[i]);
+                        robo.setStart(data.buttonData[i]);
                         break;
 //                    case ControlIDs.XBOX:
 //                        robo.setXbox(data.buttonData[i]);
 //                        break;
                     case ControlIDs.LTHUMBBTN:
-                        robo.setLThumb(controlData.buttonData[i]);
+                        robo.setLThumb(data.buttonData[i]);
                         break;
                     case ControlIDs.RTHUMBBTN:
-                        robo.setRThumb(controlData.buttonData[i]);
+                        robo.setRThumb(data.buttonData[i]);
                         break;
 //                    case ControlIDs.L2:
 //                        robo.setData(data.buttonData[i]);
@@ -459,15 +563,15 @@ public class Protocol extends AbstractNodeMain {
                     }
                 }
                 // Set dpad
-                robo.setDpX((byte)controlData.dpad_x);
-                robo.setDpY((byte)controlData.dpad_y);
+                robo.setDpX((byte)data.dpad_x);
+                robo.setDpY((byte)data.dpad_y);
                 //Adds logging messsage to make sure that it is sending data
                 Log.d(TAG, "Sending Data");
                 //send data
                 publisher.publish(robo);
             }
         }
-    }
+    }*/
 
     private class ConnCheckWorker implements Runnable {
         private HUDActivity hudActivity;

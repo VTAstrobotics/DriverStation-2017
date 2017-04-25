@@ -53,7 +53,7 @@ public class HUDActivity extends RosActivity {
     private boolean oldRobotUp = false;
 
     public HUDActivity() {
-        super("", "", ROBOT_ROS_URI);
+        super("Astrobotics", "Driver Station 2017", ROBOT_ROS_URI);
     }
 
     @Override
@@ -81,8 +81,8 @@ public class HUDActivity extends RosActivity {
                 }
             }
         });
-            protocol = new Protocol();
-            protocol.startConnChecker(this);
+        protocol = new Protocol();
+        protocol.startConnChecker(this);
         // Initialize indicators
         initIndicator(R.id.robot_status, R.drawable.ic_robot_status);
         initIndicator(R.id.controller_status, R.drawable.ic_controller_status);
@@ -130,9 +130,7 @@ public class HUDActivity extends RosActivity {
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        Protocol protocol = new Protocol();
-
-        NodeConfiguration protocolConfig = NodeConfiguration.newPrivate(getMasterUri());
+        NodeConfiguration protocolConfig = NodeConfiguration.newPublic(getRosHostname(), getMasterUri());
         nodeMainExecutor.execute(protocol, protocolConfig);
     }
 
@@ -162,6 +160,7 @@ public class HUDActivity extends RosActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if((event.getSource() & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
+            Log.d("ds2017", "onKeyUp " + keyCode);
             protocol.sendButton(keyCode, false);
             return true;
         }
