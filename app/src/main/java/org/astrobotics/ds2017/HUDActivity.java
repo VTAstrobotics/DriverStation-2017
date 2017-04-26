@@ -160,7 +160,6 @@ public class HUDActivity extends RosActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if((event.getSource() & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
-            Log.d("ds2017", "onKeyUp " + keyCode);
             protocol.sendButton(keyCode, false);
             return true;
         }

@@ -154,8 +154,6 @@ public class Protocol extends AbstractNodeMain {
                 return;
         }
 
-        Log.d("ds2017", "sendButton " + wasChanged);
-
         // send the data on change
         if(wasChanged) {
             sendData();
