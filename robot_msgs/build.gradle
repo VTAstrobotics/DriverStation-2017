@@ -30,4 +30,12 @@ dependencies {
     compile 'org.ros.rosjava_bootstrap:message_generation:0.3.0'
 }
 
-idea.module.sourceDirs += file(genDir)
+idea {
+    module {
+        sourceDirs += file(genDir)
+        generatedSourceDirs += file(genDir)
+        excludeDirs += [file("${buildDir}/classes"),
+                        file("${buildDir}/libs"),
+                        file("${buildDir}/tmp")]
+    }
+}
