@@ -106,8 +106,7 @@ public class Protocol extends AbstractNodeMain {
                 break;
             default:
         }
-        // always send data for axis changes
-        sendData();
+        // defer sendData until all axes have been set
     }
 
     // for pressing buttons

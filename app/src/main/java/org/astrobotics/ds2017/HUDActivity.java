@@ -172,6 +172,8 @@ public class HUDActivity extends RosActivity {
             for(int axis : AXES) {
                 protocol.setStick(axis, event.getAxisValue(axis));
             }
+            // always send data for axis changes, after all axes updated
+            protocol.sendData();
             return true;
         }
         return super.onGenericMotionEvent(event);
