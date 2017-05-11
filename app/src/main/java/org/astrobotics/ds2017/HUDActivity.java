@@ -82,7 +82,6 @@ public class HUDActivity extends RosActivity {
             }
         });
         protocol = new Protocol();
-        protocol.startConnChecker(this);
         // Initialize indicators
         initIndicator(R.id.robot_status, R.drawable.ic_robot_status);
         initIndicator(R.id.controller_status, R.drawable.ic_controller_status);

@@ -16,46 +16,43 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import org.astrobotics.ds2017.HUDActivity;
+import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+
+import robot_msgs.Status;
 import robot_msgs.Teleop;
 
 /**
  * Implements the network protocol
  */
 public class Protocol extends AbstractNodeMain {
-    private static final String TAG = "ds2017";
+    private static final java.lang.String TAG = "ds2017";
     private static final int DEADMAN = KeyEvent.KEYCODE_BUTTON_L1;
     private static final int ROBOT_PORT_SEND = 6800, ROBOT_PORT_RECEIVE = 6850;
     private static final int ROBOT_PING_SEND = 6900;
     private static final int PING_FREQUENCY = 200; // 5 times per second
     private static final int CONNCHECK_FREQUENCY = 2000; // every 2 seconds
     private static InetAddress ROBOT_ADDRESS = null;
-    private static String TELEOP_TOPIC = "/robot/teleop";
+    private static java.lang.String TELEOP_TOPIC = "/robot/teleop";
 
     private DatagramSocket socket_send, socket_ping, socket_receive;
-//    private LinkedBlockingQueue<ControlData> sendQueue = new LinkedBlockingQueue<>();
-    private Thread sendThread, pinging, receiving, connCheck;
-
     // instance of current control data
     private ControlData controlData = new ControlData();
     // instance of most recent data received
-//    private ReceiveData receiveData;
+    // private ReceiveData receiveData;
 
     private volatile Publisher<robot_msgs.Teleop> publisher;
 
     static {
         try {
-            ROBOT_ADDRESS = InetAddress.getByAddress(new byte[] {10, 0, 0, 30});
-        } catch(UnknownHostException e) {
+            ROBOT_ADDRESS = InetAddress.getByAddress(new byte[]{10, 0, 0, 30});
+        } catch (UnknownHostException e) {
             throw new ExceptionInInitializerError(e);
         }
-    }
-
-    public Protocol() {
-//        sendThread = new Thread(new SendWorker(), "Send Thread");
     }
 
     @Override
@@ -66,20 +63,20 @@ public class Protocol extends AbstractNodeMain {
     @Override
     public void onStart(final ConnectedNode connectedNode) {
         publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
-//        sendThread.start();
-    }
-
-    public void startConnChecker(HUDActivity hudActivity) {
-        if(connCheck != null) {
-            connCheck.interrupt();
-        }
-        connCheck = new Thread(new ConnCheckWorker(hudActivity), "Connectivity Check Thread");
-        connCheck.start();
+        Subscriber<robot_msgs.Status> subscriber = connectedNode.newSubscriber("chatter", robot_msgs.Status._TYPE);
+        subscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
+            @Override
+            public void onNewMessage(robot_msgs.Status message) {
+                message.getRobotCodeActive();
+                message.getAutonomyActive();
+                message.getDeadmanPressed();
+            }
+        });
     }
 
     //Function for setting the stick given the axis and the value
     public void setStick(int axis, float value) {
-        switch(axis) {
+        switch (axis) {
             case MotionEvent.AXIS_X:
                 controlData.setAxis(ControlIDs.LTHUMBX, value);
                 break;
@@ -112,7 +109,7 @@ public class Protocol extends AbstractNodeMain {
     // for pressing buttons
     public void sendButton(int keycode, boolean pressed) {
         boolean wasChanged;
-        switch(keycode) {
+        switch (keycode) {
             case KeyEvent.KEYCODE_BUTTON_A:
                 wasChanged = controlData.setButton(ControlIDs.A, pressed);
                 break;
@@ -154,16 +151,8 @@ public class Protocol extends AbstractNodeMain {
         }
 
         // send the data on change
-        if(wasChanged) {
+        if (wasChanged) {
             sendData();
-            // probably don't need the stuff below
-/*            // send twice if the button was released
-            if(!pressed) {
-                sendData();
-                // send again if the button released was deadman
-                if(keycode == DEADMAN) {
-                    sendData();
-                }*/
         }
     }
 
@@ -172,10 +161,9 @@ public class Protocol extends AbstractNodeMain {
         ControlData data = controlData;
         robot_msgs.Teleop robo = publisher.newMessage();
         // Set axes
-        for(int i = 0; i < data.data.length; i++)
-        {
-            switch(i) {
-                case ControlIDs.LTHUMBX :
+        for (int i = 0; i < data.data.length; i++) {
+            switch (i) {
+                case ControlIDs.LTHUMBX:
                     robo.setXLThumb(data.data[i]);
                     break;
                 case ControlIDs.LTHUMBY:
@@ -208,9 +196,8 @@ public class Protocol extends AbstractNodeMain {
             }
         }
         // Set buttons
-        for(int i = 0; i < data.buttonData.length; i++)
-        {
-            switch(i) {
+        for (int i = 0; i < data.buttonData.length; i++) {
+            switch (i) {
                 case ControlIDs.A:
                     robo.setA(data.buttonData[i]);
                     break;
@@ -253,8 +240,8 @@ public class Protocol extends AbstractNodeMain {
             }
         }
         // Set dpad
-        robo.setDpX((byte)data.dpad_x);
-        robo.setDpY((byte)data.dpad_y);
+        robo.setDpX((byte) data.dpad_x);
+        robo.setDpY((byte) data.dpad_y);
         //Adds logging messsage to make sure that it is sending data
         Log.d(TAG, "Sending Data");
         //send data
@@ -285,42 +272,6 @@ public class Protocol extends AbstractNodeMain {
         public static final int NUM_BTNS = 10;
     }
 
-    // holds details given from the robot to DS
-/*    private static class ReceiveData {
-        public static final int SIZE = 4;
-
-        // if the dead man's switch is on or off
-        private boolean isDeadMansDown;
-        // holds the battery voltage
-        private float voltage = 0;
-
-        public ReceiveData() {
-            this.isDeadMansDown = false;
-            this.voltage = 0;
-        }
-
-        public void setDeadMansDown(boolean b) {
-            this.isDeadMansDown = b;
-        }
-
-        public void setVoltage(float b) {
-            this.voltage = b;
-        }
-
-        // returns voltage as an int
-        public int getVoltage() {
-            return ((int) (this.voltage));
-        }
-
-        public boolean getIsDeadMansDown() {
-            return isDeadMansDown;
-        }
-
-        public java.lang.String toString() {
-            return "Dead Man's: " + isDeadMansDown + " , Voltage: " + voltage;
-        }
-    }*/
-
     private static class ControlData {
         // for axis dead zone
         private static final float AXIS_BOUNDS = 0.1f;
@@ -346,7 +297,7 @@ public class Protocol extends AbstractNodeMain {
         public ControlData(ControlData oldData) {
             this.data = new float[oldData.data.length];
             // deep copy old data
-            for(int i = 0; i < oldData.data.length; i++) {
+            for (int i = 0; i < oldData.data.length; i++) {
                 this.data[i] = oldData.data[i];
             }
         }
@@ -356,7 +307,7 @@ public class Protocol extends AbstractNodeMain {
         // returns true if button was changed, false if not
         public boolean setButton(int ID, boolean down) {
             boolean oldval = buttonData[ID];
-            if(down) {
+            if (down) {
                 buttonData[ID] = true;
             } else {
                 buttonData[ID] = false;
@@ -367,15 +318,15 @@ public class Protocol extends AbstractNodeMain {
         // assumes the id is for an axis
         // takes value from -1 to 1 and converts to specified range
         public void setAxis(int ID, float value) {
-            if(value > AXIS_BOUNDS) {
+            if (value > AXIS_BOUNDS) {
                 // cap at 1.0
-                if(value > AXIS_MAX) {
+                if (value > AXIS_MAX) {
                     value = AXIS_MAX;
                 }
                 data[ID] = value;
-            } else if(value < -AXIS_BOUNDS) {
+            } else if (value < -AXIS_BOUNDS) {
                 // cap at -1.0
-                if(value < -AXIS_MAX) {
+                if (value < -AXIS_MAX) {
                     value = -AXIS_FLOAT_MAX;
                 }
                 data[ID] = value;
@@ -386,18 +337,18 @@ public class Protocol extends AbstractNodeMain {
 
         // dpad comes as a float, but should be set to on or off
         public void setDpad(int eventCode, float value) {
-            if(eventCode == MotionEvent.AXIS_HAT_X) {
-                if(value > DPAD_BOUNDS) {
+            if (eventCode == MotionEvent.AXIS_HAT_X) {
+                if (value > DPAD_BOUNDS) {
                     dpad_x = 1;
-                } else if(value < -DPAD_BOUNDS) {
+                } else if (value < -DPAD_BOUNDS) {
                     dpad_x = -1;
                 } else {
                     dpad_x = 0;
                 }
-            } else if(eventCode == MotionEvent.AXIS_HAT_Y) {
-                if(value > DPAD_BOUNDS) {
+            } else if (eventCode == MotionEvent.AXIS_HAT_Y) {
+                if (value > DPAD_BOUNDS) {
                     dpad_y = 1;
-                } else if(value < -DPAD_BOUNDS) {
+                } else if (value < -DPAD_BOUNDS) {
                     dpad_y = -1;
                 } else {
                     dpad_y = 0;
@@ -406,13 +357,13 @@ public class Protocol extends AbstractNodeMain {
         }
 
         // return a printable string, for debugging
-        public String toString() {
-            String str = "Axes => ";
-            for(int i = 0; i < data.length; i++) {
+        public java.lang.String toString() {
+            java.lang.String str = "Axes => ";
+            for (int i = 0; i < data.length; i++) {
                 str += i + ": " + data[i] + ", ";
             }
             str += "Buttons => ";
-            for(int i = 0; i < buttonData.length; i++) {
+            for (int i = 0; i < buttonData.length; i++) {
                 str += i + ": " + buttonData[i] + ", ";
             }
             str += "Dpad => x: " + dpad_x + ", y: " + dpad_y;
@@ -432,179 +383,7 @@ public class Protocol extends AbstractNodeMain {
     private class ReceiveWorker implements Runnable {
         @Override
         public void run() {
-            // initialize socket on dedicated thread
-            // TODO handle receiving Status msg - subscriber in onStart
-/*            try {
-                socket_receive.bind(new InetSocketAddress(ROBOT_PORT_RECEIVE));
-            } catch(SocketException e) {
-                e.printStackTrace();
-                return;
-            }
 
-            // while the thread can work
-            while(!Thread.interrupted() && !socket_receive.isClosed()) {
-                byte[] temp_bytes = new byte[ReceiveData.SIZE];
-                DatagramPacket temp_data = new DatagramPacket(temp_bytes, temp_bytes.length);
-
-                // receive the data
-                try {
-                    socket_receive.receive(temp_data);
-                } catch(IOException e) {
-                    Log.d("tag", "error in receive data occured or no data received.... not sure");
-                    continue;
-                }
-
-                // take it apart
-                // 0 = deadman
-                // 1 = voltage
-                // handle the actual data
-                receiveData.setDeadMansDown(temp_bytes[0] != 0);
-                receiveData.setVoltage(temp_bytes[1]);
-            }*/
-        }
-    }
-
-    // send the data from the queue in a thread
-/*    private class SendWorker implements Runnable {
-        @Override
-        public void run() {
-            ControlData data;
-            // while the thread can send
-            while(!Thread.interrupted()) {
-                try {
-                    data = sendQueue.take();
-                } catch(InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-                robot_msgs.Teleop robo = publisher.newMessage();
-                // Set axes
-                for(int i = 0; i < data.data.length; i++)
-                {
-                    switch(i) {
-                        case ControlIDs.LTHUMBX :
-                            robo.setXLThumb(data.data[i]);
-                            break;
-                        case ControlIDs.LTHUMBY:
-                            robo.setYLThumb(data.data[i]);
-                            break;
-                        case ControlIDs.RTHUMBX:
-                            robo.setXRThumb(data.data[i]);
-                            break;
-                        case ControlIDs.RTHUMBY:
-                            robo.setYRThumb(data.data[i]);
-                            break;
-                        case ControlIDs.RTRIGGER:
-                            robo.setRTrig(data.data[i]);
-                            break;
-                        case ControlIDs.LTRIGGER:
-                            robo.setLTrig(data.data[i]);
-                            break;
-                        /*case ControlIDs.DPAD_UP:
-                            robo.setData(data.data[i]);
-                            break;
-                        case ControlIDs.DPAD_DOWN:
-                            break;
-                            robo.setData(data.data[i]);
-                        case ControlIDs.DPAD_LEFT:
-                            robo.setData(data.data[i]);
-                            break;
-                        case ControlIDs.DPAD_RIGHT:
-                            robo.setData(data.data[i]);
-                            break;*/
-                    /*}
-                }
-                // Set buttons
-                for(int i = 0; i < data.buttonData.length; i++)
-                {
-                    switch(i) {
-                    case ControlIDs.A:
-                        robo.setA(data.buttonData[i]);
-                        break;
-                    case ControlIDs.B:
-                        robo.setB(data.buttonData[i]);
-                        break;
-                    case ControlIDs.X:
-                        robo.setX(data.buttonData[i]);
-                        break;
-                    case ControlIDs.Y:
-                        robo.setY(data.buttonData[i]);
-                        break;
-                    case ControlIDs.LB:
-                        robo.setLb(data.buttonData[i]);
-                        break;
-                    case ControlIDs.RB:
-                        robo.setRb(data.buttonData[i]);
-                        break;
-                    case ControlIDs.BACK:
-                        robo.setBack(data.buttonData[i]);
-                        break;
-                    case ControlIDs.START:
-                        robo.setStart(data.buttonData[i]);
-                        break;
-//                    case ControlIDs.XBOX:
-//                        robo.setXbox(data.buttonData[i]);
-//                        break;
-                    case ControlIDs.LTHUMBBTN:
-                        robo.setLThumb(data.buttonData[i]);
-                        break;
-                    case ControlIDs.RTHUMBBTN:
-                        robo.setRThumb(data.buttonData[i]);
-                        break;
-//                    case ControlIDs.L2:
-//                        robo.setData(data.buttonData[i]);
-//                        break;
-//                    case ControlIDs.R2:
-//                        robo.setData(data.buttonData[i]);
-//                        break;
-                    }
-                }
-                // Set dpad
-                robo.setDpX((byte)data.dpad_x);
-                robo.setDpY((byte)data.dpad_y);
-                //Adds logging messsage to make sure that it is sending data
-                Log.d(TAG, "Sending Data");
-                //send data
-                publisher.publish(robo);
-            }
-        }
-    }*/
-
-    private class ConnCheckWorker implements Runnable {
-        private HUDActivity hudActivity;
-
-        public ConnCheckWorker(HUDActivity hudActivity) {
-            this.hudActivity = hudActivity;
-        }
-
-        @Override
-        public void run() {
-            while(!Thread.interrupted()) {
-                boolean robotUp = checkHost(ROBOT_ADDRESS);
-                hudActivity.setRobotUp(robotUp);
-                try {
-                    Thread.sleep(CONNCHECK_FREQUENCY);
-                } catch(InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        /**
-         * Check by testing port 22 (SSH) on the given host
-         */
-        public boolean checkHost(InetAddress addr) {
-            try {
-                Socket test = new Socket();
-                test.connect(new InetSocketAddress(addr, 22), 200); // timeout after 200ms
-                test.close();
-                return true;
-            } catch(SocketTimeoutException | SocketException e) {
-                // Ignore these
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-            return false;
         }
     }
 }
