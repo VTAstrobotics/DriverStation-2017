@@ -32,12 +32,9 @@ import robot_msgs.Teleop;
 public class Protocol extends AbstractNodeMain {
     private static final java.lang.String TAG = "ds2017";
     private static final int DEADMAN = KeyEvent.KEYCODE_BUTTON_L1;
-    private static final int ROBOT_PORT_SEND = 6800, ROBOT_PORT_RECEIVE = 6850;
-    private static final int ROBOT_PING_SEND = 6900;
-    private static final int PING_FREQUENCY = 200; // 5 times per second
-    private static final int CONNCHECK_FREQUENCY = 2000; // every 2 seconds
     private static InetAddress ROBOT_ADDRESS = null;
     private static java.lang.String TELEOP_TOPIC = "/robot/teleop";
+    private static java.lang.String STATUS_TOPIC = "/robot/status";
 
     private DatagramSocket socket_send, socket_ping, socket_receive;
     // instance of current control data
@@ -63,7 +60,7 @@ public class Protocol extends AbstractNodeMain {
     @Override
     public void onStart(final ConnectedNode connectedNode) {
         publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
-        Subscriber<robot_msgs.Status> subscriber = connectedNode.newSubscriber("/robot/status", robot_msgs.Status._TYPE);
+        Subscriber<robot_msgs.Status> subscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
         subscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
             @Override
             public void onNewMessage(robot_msgs.Status message) {
