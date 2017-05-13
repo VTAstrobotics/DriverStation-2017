@@ -63,7 +63,7 @@ public class Protocol extends AbstractNodeMain {
     @Override
     public void onStart(final ConnectedNode connectedNode) {
         publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
-        Subscriber<robot_msgs.Status> subscriber = connectedNode.newSubscriber("chatter", robot_msgs.Status._TYPE);
+        Subscriber<robot_msgs.Status> subscriber = connectedNode.newSubscriber("/robot/status", robot_msgs.Status._TYPE);
         subscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
             @Override
             public void onNewMessage(robot_msgs.Status message) {
