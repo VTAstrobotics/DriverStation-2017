@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import org.astrobotics.ds2017.HUDActivity;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -25,6 +26,7 @@ import org.ros.node.topic.Subscriber;
 
 import robot_msgs.Status;
 import robot_msgs.Teleop;
+import robot_msgs.Ping;
 
 /**
  * Implements the network protocol
@@ -35,6 +37,7 @@ public class Protocol extends AbstractNodeMain {
     private static InetAddress ROBOT_ADDRESS = null;
     private static java.lang.String TELEOP_TOPIC = "/robot/teleop";
     private static java.lang.String STATUS_TOPIC = "/robot/status";
+    private static java.lang.String PING_TOPIC = "/driver/ping";
 
     private DatagramSocket socket_send, socket_ping, socket_receive;
     // instance of current control data
@@ -43,6 +46,7 @@ public class Protocol extends AbstractNodeMain {
     // private ReceiveData receiveData;
 
     private volatile Publisher<robot_msgs.Teleop> publisher;
+    private volatile Publisher<robot_msgs.Ping> pingPublisher;
 
     static {
         try {
@@ -59,14 +63,42 @@ public class Protocol extends AbstractNodeMain {
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
+        //Instantiates the publishers for the Teleop data and Ping data
         publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
-        Subscriber<robot_msgs.Status> subscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
-        subscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
+        pingPublisher = connectedNode.newPublisher(PING_TOPIC, robot_msgs.Ping._TYPE);
+        //Instantiate status msg object for subscriber and declares
+        Subscriber<robot_msgs.Status> statusSubscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
+        //Adds listener for subscriber
+        statusSubscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
             @Override
             public void onNewMessage(robot_msgs.Status message) {
+                //Receives status data and stores in var for display in HUDActivity
+                //TODO: Hand off data to HUD Activity
                 message.getRobotCodeActive();
                 message.getAutonomyActive();
                 message.getDeadmanPressed();
+                //Adds logging messsage to make sure that it is sending data
+                Log.d(TAG, "Receiving Status Data");
+            }
+        });
+        //CancellableLoop is made and started
+        connectedNode.executeCancellableLoop(new CancellableLoop() {
+            //Initalizes a var for the ping msg data
+            private byte pingData;
+            @Override
+            protected void setup(){
+                //Declares a var for the ping msg data
+                pingData = 0;
+            }
+            @Override
+            //This is what happens when the loop starts
+            protected void loop() throws InterruptedException {
+                //Instantiate ping msg object
+                robot_msgs.Ping ping = pingPublisher.newMessage();
+                //Sets the byte to 0
+                ping.setData(pingData);
+                //Adds ping logging msg to make sure that it is pinging
+                Log.d(TAG, "Ping Sent");
             }
         });
     }
@@ -239,8 +271,7 @@ public class Protocol extends AbstractNodeMain {
         // Set dpad
         robo.setDpX((byte) data.dpad_x);
         robo.setDpY((byte) data.dpad_y);
-        //Adds logging messsage to make sure that it is sending data
-        Log.d(TAG, "Sending Data");
+
         //send data
         publisher.publish(robo);
     }
@@ -365,22 +396,6 @@ public class Protocol extends AbstractNodeMain {
             }
             str += "Dpad => x: " + dpad_x + ", y: " + dpad_y;
             return str;
-        }
-    }
-
-    private class PingWorker implements Runnable {
-        @Override
-        public void run() {
-            // TODO something for pinging in loop
-            // doesn't need to be a thread, can use ROS cancellable loop or similar
-        }
-    }
-
-    // recieve data from robot
-    private class ReceiveWorker implements Runnable {
-        @Override
-        public void run() {
-
         }
     }
 }
