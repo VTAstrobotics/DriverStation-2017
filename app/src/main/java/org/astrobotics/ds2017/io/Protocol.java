@@ -104,7 +104,6 @@ public class Protocol extends AbstractNodeMain {
         }
         else{
             connectedNodeFlag = false;
-            publisherActive = false;
         }
     }
 
