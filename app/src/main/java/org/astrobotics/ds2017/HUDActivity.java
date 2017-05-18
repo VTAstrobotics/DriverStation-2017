@@ -108,6 +108,7 @@ public class HUDActivity extends RosActivity {
                 updateGamepadStatus();
             }
         }, null);
+
         updateGamepadStatus();
         setStatus(R.id.robot_code_active);
         setStatus(R.id.deadman_pressed);
@@ -291,6 +292,7 @@ public class HUDActivity extends RosActivity {
         String wifiText = "Wifi: ";
         if(info == null) {
             wifiText += "<font color='red'>DISCONNECTED</font>";
+            setSpinner(protocol.isPublisherActive());
         } else {
             String ssid = info.getSSID();
             wifiText += "<font color='green'>" + ssid.substring(1, ssid.length() - 1) + "</font>";
