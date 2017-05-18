@@ -32,9 +32,10 @@ public class Protocol extends AbstractNodeMain {
     private static java.lang.String TELEOP_TOPIC = "/robot/teleop";
     private static java.lang.String STATUS_TOPIC = "/robot/status";
     private static java.lang.String PING_TOPIC = "/driver/ping";
-    private boolean RobotCodeActive = false;
-    private boolean AutonomyActive = false;
-    private boolean DeadmanPressed = false;
+    private boolean robotCodeActive = false;
+    private boolean autonomyActive = false;
+    private boolean deadmanPressed = false;
+    private boolean publisherActive = false;
     private DatagramSocket socket_send, socket_ping, socket_receive;
     // instance of current control data
     private ControlData controlData = new ControlData();
@@ -70,9 +71,9 @@ public class Protocol extends AbstractNodeMain {
             public void onNewMessage(robot_msgs.Status message) {
                 //Receives status data and stores in var for display in HUDActivity
                 //TODO: Hand off data to HUD Activity
-                RobotCodeActive = message.getRobotCodeActive();
-                AutonomyActive = message.getAutonomyActive();
-                DeadmanPressed = message.getDeadmanPressed();
+                robotCodeActive = message.getRobotCodeActive();
+                autonomyActive = message.getAutonomyActive();
+                deadmanPressed = message.getDeadmanPressed();
                 //Adds logging messsage to make sure that it is sending data
                 Log.d(TAG, "Receiving Status Data");
             }
@@ -103,17 +104,21 @@ public class Protocol extends AbstractNodeMain {
     public boolean getStatus(int viewId){
         switch (viewId) {
             case R.id.robot_code_active:
-                return RobotCodeActive;
+                return robotCodeActive;
 
             case R.id.autonomy_active:
-                return AutonomyActive;
+                return autonomyActive;
 
             case R.id.deadman_pressed:
-                return DeadmanPressed;
+                return deadmanPressed;
             default:
                 Log.d(TAG, "Problem Getting Status");
                 return false;
         }
+    }
+
+    public boolean isPublisherActive(boolean publisherActive){
+        return publisherActive;
     }
 
     //Function for setting the stick given the axis and the value
@@ -195,6 +200,11 @@ public class Protocol extends AbstractNodeMain {
         // send the data on change
         if (wasChanged) {
             sendData();
+            publisherActive = true;
+        }
+        else
+        {
+            publisherActive = false;
         }
     }
 

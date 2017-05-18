@@ -57,7 +57,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/stream_buttons"
         android:layout_centerHorizontal="true"
-        android:text="@string/cam_none" android:textColor="@color/cam_text_color"/>
+        android:text="@string/cam_none" android:textColor="@color/cam_text_color"
+        android:id="@+id/textView3" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -67,7 +68,8 @@
         android:layout_gravity="center"
         android:layout_toEndOf="@+id/stream_buttons" android:layout_toRightOf="@+id/stream_buttons"
         android:gravity="center" android:text="@string/cam_right"
-        android:textColor="@color/cam_text_color"/>
+        android:textColor="@color/cam_text_color"
+        android:id="@+id/textView4" />
 
     <RadioGroup
         android:id="@+id/stream_buttons"
@@ -136,5 +138,23 @@
         android:layout_below="@+id/autonomy_active"
         android:text="@string/deadman_pressed"
         android:textColor="@color/status_text_color"/>
+
+    <ProgressBar
+        android:id="@+id/ActivePublisher"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="64dp" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
+        android:text="Publsiher Active" />
 
 </RelativeLayout>
