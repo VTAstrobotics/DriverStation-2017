@@ -70,7 +70,6 @@ public class Protocol extends AbstractNodeMain {
             @Override
             public void onNewMessage(robot_msgs.Status message) {
                 //Receives status data and stores in var for display in HUDActivity
-                //TODO: Hand off data to HUD Activity
                 robotCodeActive = message.getRobotCodeActive();
                 autonomyActive = message.getAutonomyActive();
                 deadmanPressed = message.getDeadmanPressed();

@@ -212,7 +212,7 @@ public class HUDActivity extends RosActivity {
         }
     }
 
-    public void setStatus(int viewId){
+    private void setStatus(int viewId){
         TextView textView = (TextView) findViewById(viewId);
         switch (viewId) {
             case R.id.robot_code_active:
