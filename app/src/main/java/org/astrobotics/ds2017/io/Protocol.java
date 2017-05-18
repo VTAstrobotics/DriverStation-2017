@@ -116,7 +116,7 @@ public class Protocol extends AbstractNodeMain {
         }
     }
 
-    public boolean isPublisherActive(boolean publisherActive){
+    public boolean isPublisherActive(){
         return publisherActive;
     }
 

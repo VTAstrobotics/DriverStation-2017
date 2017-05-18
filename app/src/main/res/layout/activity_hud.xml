@@ -148,7 +148,7 @@
         android:layout_centerHorizontal="true" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/active_publisher"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Publsiher Active"

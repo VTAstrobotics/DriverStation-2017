@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -111,6 +112,7 @@ public class HUDActivity extends RosActivity {
         setStatus(R.id.robot_code_active);
         setStatus(R.id.deadman_pressed);
         setStatus(R.id.autonomy_active);
+        setSpinner(protocol.isPublisherActive());
         wifiReceiver = new WifiChangedReceiver();
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 
@@ -227,6 +229,19 @@ public class HUDActivity extends RosActivity {
             default:
                 Log.d(TAG, "Problem with status ID");
                 break;
+        }
+    }
+
+    private void setSpinner(boolean spinning){
+        ProgressBar spinner = (ProgressBar)findViewById(R.id.ActivePublisher);
+        TextView textView = (TextView) findViewById(R.id.active_publisher);
+        if (spinning){
+            spinner.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
+        }
+        else{
+            spinner.setVisibility(View.GONE);
+            textView.setVisibility(View.GONE);
         }
     }
 
