@@ -4,6 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="cam_text_color">#FFFFFF</color>
-
+    <color name="status_text_color">#802734</color>
     <color name="black_overlay">#66000000</color>
 </resources>

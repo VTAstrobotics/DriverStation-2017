@@ -106,4 +106,35 @@
         android:layout_centerHorizontal="true" android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/cam_text_color"/>
 
+    <TextView
+        android:id="@+id/robot_code_active"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/robot_status"
+        android:layout_marginTop="21dp"
+        android:layout_toLeftOf="@+id/stream_buttons"
+        android:layout_toStartOf="@+id/stream_buttons"
+        android:text="@string/robot_code_active"
+        android:textColor="@color/status_text_color" />
+
+    <TextView
+        android:id="@+id/autonomy_active"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/robot_code_active"
+        android:layout_alignStart="@+id/robot_code_active"
+        android:layout_below="@+id/robot_code_active"
+        android:text="@string/autonomy_active"
+        android:textColor="@color/status_text_color"/>
+
+    <TextView
+        android:id="@+id/deadman_pressed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/autonomy_active"
+        android:layout_alignStart="@+id/autonomy_active"
+        android:layout_below="@+id/autonomy_active"
+        android:text="@string/deadman_pressed"
+        android:textColor="@color/status_text_color"/>
+
 </RelativeLayout>

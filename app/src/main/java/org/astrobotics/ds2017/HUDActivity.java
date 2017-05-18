@@ -34,6 +34,8 @@ import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
+import static android.content.ContentValues.TAG;
+
 public class HUDActivity extends RosActivity {
     private static final int[] AXES = new int[] {MotionEvent.AXIS_X, MotionEvent.AXIS_Y,
             MotionEvent.AXIS_Z, MotionEvent.AXIS_RZ, MotionEvent.AXIS_BRAKE,
@@ -106,7 +108,9 @@ public class HUDActivity extends RosActivity {
             }
         }, null);
         updateGamepadStatus();
-
+        setStatus(R.id.robot_code_active);
+        setStatus(R.id.deadman_pressed);
+        setStatus(R.id.autonomy_active);
         wifiReceiver = new WifiChangedReceiver();
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 
@@ -208,6 +212,24 @@ public class HUDActivity extends RosActivity {
         }
     }
 
+    public void setStatus(int viewId){
+        TextView textView = (TextView) findViewById(viewId);
+        switch (viewId) {
+            case R.id.robot_code_active:
+                textView.setText("Robot Code Active: "+String.valueOf(protocol.getStatus(R.id.robot_code_active)));
+                break;
+            case R.id.autonomy_active:
+                textView.setText("Autonomy Active: "+String.valueOf(protocol.getStatus(R.id.autonomy_active)));
+                break;
+            case R.id.deadman_pressed:
+                textView.setText("Deadman Pressed: "+String.valueOf(protocol.getStatus(R.id.deadman_pressed)));
+                break;
+            default:
+                Log.d(TAG, "Problem with status ID");
+                break;
+        }
+    }
+
     private void loadStream(String url) {
         mjpegView = (MjpegView) findViewById(R.id.stream);
         try {
@@ -243,6 +265,9 @@ public class HUDActivity extends RosActivity {
                 return;
             }
         }
+        setStatus(R.id.robot_code_active);
+        setStatus(R.id.deadman_pressed);
+        setStatus(R.id.autonomy_active);
         setIndicator(R.id.controller_status, false);
     }
 

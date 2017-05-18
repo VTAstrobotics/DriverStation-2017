@@ -1,21 +1,14 @@
 package org.astrobotics.ds2017.io;
+import org.astrobotics.ds2017.R;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import org.astrobotics.ds2017.HUDActivity;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -28,6 +21,7 @@ import robot_msgs.Status;
 import robot_msgs.Teleop;
 import robot_msgs.Ping;
 
+
 /**
  * Implements the network protocol
  */
@@ -38,7 +32,9 @@ public class Protocol extends AbstractNodeMain {
     private static java.lang.String TELEOP_TOPIC = "/robot/teleop";
     private static java.lang.String STATUS_TOPIC = "/robot/status";
     private static java.lang.String PING_TOPIC = "/driver/ping";
-
+    private boolean RobotCodeActive = false;
+    private boolean AutonomyActive = false;
+    private boolean DeadmanPressed = false;
     private DatagramSocket socket_send, socket_ping, socket_receive;
     // instance of current control data
     private ControlData controlData = new ControlData();
@@ -74,13 +70,14 @@ public class Protocol extends AbstractNodeMain {
             public void onNewMessage(robot_msgs.Status message) {
                 //Receives status data and stores in var for display in HUDActivity
                 //TODO: Hand off data to HUD Activity
-                message.getRobotCodeActive();
-                message.getAutonomyActive();
-                message.getDeadmanPressed();
+                RobotCodeActive = message.getRobotCodeActive();
+                AutonomyActive = message.getAutonomyActive();
+                DeadmanPressed = message.getDeadmanPressed();
                 //Adds logging messsage to make sure that it is sending data
                 Log.d(TAG, "Receiving Status Data");
             }
         });
+
         //CancellableLoop is made and started
         connectedNode.executeCancellableLoop(new CancellableLoop() {
             //Initalizes a var for the ping msg data
@@ -101,6 +98,22 @@ public class Protocol extends AbstractNodeMain {
                 Log.d(TAG, "Ping Sent");
             }
         });
+    }
+
+    public boolean getStatus(int viewId){
+        switch (viewId) {
+            case R.id.robot_code_active:
+                return RobotCodeActive;
+
+            case R.id.autonomy_active:
+                return AutonomyActive;
+
+            case R.id.deadman_pressed:
+                return DeadmanPressed;
+            default:
+                Log.d(TAG, "Problem Getting Status");
+                return false;
+        }
     }
 
     //Function for setting the stick given the axis and the value
