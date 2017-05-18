@@ -36,6 +36,7 @@ public class Protocol extends AbstractNodeMain {
     private boolean autonomyActive = false;
     private boolean deadmanPressed = false;
     private boolean publisherActive = false;
+    private boolean connectedNodeFlag = false;
     private DatagramSocket socket_send, socket_ping, socket_receive;
     // instance of current control data
     private ControlData controlData = new ControlData();
@@ -60,6 +61,7 @@ public class Protocol extends AbstractNodeMain {
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
+        if(connectedNode.lookupServiceUri(TELEOP_TOPIC)!=null){
         //Instantiates the publishers for the Teleop data and Ping data
         publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
         pingPublisher = connectedNode.newPublisher(PING_TOPIC, robot_msgs.Ping._TYPE);
@@ -98,6 +100,12 @@ public class Protocol extends AbstractNodeMain {
                 Log.d(TAG, "Ping Sent");
             }
         });
+            connectedNodeFlag = true;
+        }
+        else{
+            connectedNodeFlag = false;
+            publisherActive = false;
+        }
     }
 
     public boolean getStatus(int viewId){
@@ -197,7 +205,7 @@ public class Protocol extends AbstractNodeMain {
         }
 
         // send the data on change
-        if (wasChanged) {
+        if (wasChanged&&connectedNodeFlag) {
             sendData();
             publisherActive = true;
         }
