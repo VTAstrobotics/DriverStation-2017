@@ -36,13 +36,13 @@ public class Protocol extends AbstractNodeMain {
     private boolean robotCodeActive = false;
     private boolean autonomyActive = false;
     private boolean deadmanPressed = false;
-    private boolean publisherActive = false;
     private boolean connectedNodeFlag = false;
     private DatagramSocket socket_send, socket_ping, socket_receive;
     // instance of current control data
     private ControlData controlData = new ControlData();
     // instance of most recent data received
     // private ReceiveData receiveData;
+    private UpdateListener updateListener = null;
 
     private volatile Publisher<robot_msgs.Teleop> publisher;
     private volatile Publisher<std_msgs.Bool> pingPublisher;
@@ -78,6 +78,9 @@ public class Protocol extends AbstractNodeMain {
                     deadmanPressed = message.getDeadmanPressed();
                     //Adds logging messsage to make sure that it is sending data
                     Log.d(TAG, "Receiving Status Data");
+                    if(updateListener != null) {
+                        updateListener.statusUpdated();
+                    }
                 }
             });
 
@@ -99,6 +102,10 @@ public class Protocol extends AbstractNodeMain {
                 }
             });
             connectedNodeFlag = true;
+
+            if(updateListener != null) {
+                updateListener.statusUpdated();
+            }
         } else {
             connectedNodeFlag = false;
         }
@@ -121,8 +128,12 @@ public class Protocol extends AbstractNodeMain {
         }
     }
 
+    public void setUpdateListener(UpdateListener listener) {
+        updateListener = listener;
+    }
+
     public boolean isPublisherActive() {
-        return publisherActive;
+        return publisher != null;
     }
 
     //Function for setting the stick given the axis and the value
@@ -204,9 +215,6 @@ public class Protocol extends AbstractNodeMain {
         // send the data on change
         if(wasChanged && connectedNodeFlag) {
             sendData();
-            publisherActive = true;
-        } else {
-            publisherActive = false;
         }
     }
 
@@ -422,5 +430,9 @@ public class Protocol extends AbstractNodeMain {
             str += "Dpad => x: " + dpad_x + ", y: " + dpad_y;
             return str;
         }
+    }
+
+    public static interface UpdateListener {
+        public void statusUpdated();
     }
 }

@@ -85,6 +85,13 @@ public class HUDActivity extends RosActivity {
             }
         });
         protocol = new Protocol();
+        protocol.setUpdateListener(new Protocol.UpdateListener() {
+            @Override
+            public void statusUpdated() {
+                updateStatusGui();
+            }
+        });
+
         // Initialize indicators
         initIndicator(R.id.robot_status, R.drawable.ic_robot_status);
         initIndicator(R.id.controller_status, R.drawable.ic_controller_status);
@@ -110,10 +117,8 @@ public class HUDActivity extends RosActivity {
         }, null);
 
         updateGamepadStatus();
-        setStatus(R.id.robot_code_active);
-        setStatus(R.id.deadman_pressed);
-        setStatus(R.id.autonomy_active);
-        setSpinner(protocol.isPublisherActive());
+        updateStatusGui();
+
         wifiReceiver = new WifiChangedReceiver();
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 
@@ -219,7 +224,9 @@ public class HUDActivity extends RosActivity {
         TextView textView = (TextView) findViewById(viewId);
         switch (viewId) {
             case R.id.robot_code_active:
-                textView.setText("Robot Code Active: "+String.valueOf(protocol.getStatus(R.id.robot_code_active)));
+                boolean active = protocol.getStatus(R.id.robot_code_active);
+                textView.setText("Robot Code Active: "+String.valueOf(active));
+                setRobotUp(active);
                 break;
             case R.id.autonomy_active:
                 textView.setText("Autonomy Active: "+String.valueOf(protocol.getStatus(R.id.autonomy_active)));
@@ -244,6 +251,13 @@ public class HUDActivity extends RosActivity {
             spinner.setVisibility(View.GONE);
             textView.setVisibility(View.GONE);
         }
+    }
+
+    private void updateStatusGui() {
+        setStatus(R.id.robot_code_active);
+        setStatus(R.id.deadman_pressed);
+        setStatus(R.id.autonomy_active);
+        setSpinner(protocol.isPublisherActive());
     }
 
     private void loadStream(String url) {
@@ -281,10 +295,6 @@ public class HUDActivity extends RosActivity {
                 return;
             }
         }
-        setStatus(R.id.robot_code_active);
-        setStatus(R.id.deadman_pressed);
-        setStatus(R.id.autonomy_active);
-        setIndicator(R.id.controller_status, false);
     }
 
     @SuppressWarnings("deprecation")
@@ -292,7 +302,6 @@ public class HUDActivity extends RosActivity {
         String wifiText = "Wifi: ";
         if(info == null) {
             wifiText += "<font color='red'>DISCONNECTED</font>";
-            setSpinner(protocol.isPublisherActive());
         } else {
             String ssid = info.getSSID();
             wifiText += "<font color='green'>" + ssid.substring(1, ssid.length() - 1) + "</font>";
