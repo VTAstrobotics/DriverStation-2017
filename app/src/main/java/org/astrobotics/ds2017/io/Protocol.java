@@ -45,7 +45,7 @@ public class Protocol extends AbstractNodeMain {
     // private ReceiveData receiveData;
 
     private volatile Publisher<robot_msgs.Teleop> publisher;
-    private volatile Publisher<robot_msgs.Ping> pingPublisher;
+    private volatile Publisher<std_msgs.Bool> pingPublisher;
 
     static {
         try {
@@ -65,7 +65,7 @@ public class Protocol extends AbstractNodeMain {
         if(connectedNode.lookupServiceUri(TELEOP_TOPIC) != null) {
             //Instantiates the publishers for the Teleop data and Ping data
             publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
-            pingPublisher = connectedNode.newPublisher(PING_TOPIC, robot_msgs.Ping._TYPE);
+            pingPublisher = connectedNode.newPublisher(PING_TOPIC, std_msgs.Bool._TYPE);
             //Instantiate status msg object for subscriber and declares
             Subscriber<robot_msgs.Status> statusSubscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
             //Adds listener for subscriber
@@ -83,22 +83,17 @@ public class Protocol extends AbstractNodeMain {
 
             //CancellableLoop is made and started
             connectedNode.executeCancellableLoop(new CancellableLoop() {
-                //Initalizes a var for the ping msg data
-                private byte pingData;
-
                 @Override
                 protected void setup() {
-                    //Declares a var for the ping msg data
-                    pingData = 0;
                 }
 
                 @Override
                 //This is what happens when the loop starts
                 protected void loop() throws InterruptedException {
                     //Instantiate ping msg object
-                    robot_msgs.Ping ping = pingPublisher.newMessage();
+                    std_msgs.Bool ping = pingPublisher.newMessage();
                     //Sets the byte to 0
-                    ping.setData(pingData);
+                    ping.setData(true);
                     //Adds ping logging msg to make sure that it is pinging
                     Log.d(TAG, "Ping Sent");
                 }
@@ -119,6 +114,7 @@ public class Protocol extends AbstractNodeMain {
 
             case R.id.deadman_pressed:
                 return deadmanPressed;
+
             default:
                 Log.d(TAG, "Problem Getting Status");
                 return false;
