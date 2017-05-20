@@ -1,4 +1,5 @@
 package org.astrobotics.ds2017.io;
+
 import org.astrobotics.ds2017.R;
 
 import java.net.DatagramSocket;
@@ -48,8 +49,8 @@ public class Protocol extends AbstractNodeMain {
 
     static {
         try {
-            ROBOT_ADDRESS = InetAddress.getByAddress(new byte[]{10, 0, 0, 30});
-        } catch (UnknownHostException e) {
+            ROBOT_ADDRESS = InetAddress.getByAddress(new byte[] {10, 0, 0, 30});
+        } catch(UnknownHostException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
@@ -61,54 +62,55 @@ public class Protocol extends AbstractNodeMain {
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
-        if(connectedNode.lookupServiceUri(TELEOP_TOPIC)!=null){
-        //Instantiates the publishers for the Teleop data and Ping data
-        publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
-        pingPublisher = connectedNode.newPublisher(PING_TOPIC, robot_msgs.Ping._TYPE);
-        //Instantiate status msg object for subscriber and declares
-        Subscriber<robot_msgs.Status> statusSubscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
-        //Adds listener for subscriber
-        statusSubscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
-            @Override
-            public void onNewMessage(robot_msgs.Status message) {
-                //Receives status data and stores in var for display in HUDActivity
-                robotCodeActive = message.getRobotCodeActive();
-                autonomyActive = message.getAutonomyActive();
-                deadmanPressed = message.getDeadmanPressed();
-                //Adds logging messsage to make sure that it is sending data
-                Log.d(TAG, "Receiving Status Data");
-            }
-        });
+        if(connectedNode.lookupServiceUri(TELEOP_TOPIC) != null) {
+            //Instantiates the publishers for the Teleop data and Ping data
+            publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
+            pingPublisher = connectedNode.newPublisher(PING_TOPIC, robot_msgs.Ping._TYPE);
+            //Instantiate status msg object for subscriber and declares
+            Subscriber<robot_msgs.Status> statusSubscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
+            //Adds listener for subscriber
+            statusSubscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
+                @Override
+                public void onNewMessage(robot_msgs.Status message) {
+                    //Receives status data and stores in var for display in HUDActivity
+                    robotCodeActive = message.getRobotCodeActive();
+                    autonomyActive = message.getAutonomyActive();
+                    deadmanPressed = message.getDeadmanPressed();
+                    //Adds logging messsage to make sure that it is sending data
+                    Log.d(TAG, "Receiving Status Data");
+                }
+            });
 
-        //CancellableLoop is made and started
-        connectedNode.executeCancellableLoop(new CancellableLoop() {
-            //Initalizes a var for the ping msg data
-            private byte pingData;
-            @Override
-            protected void setup(){
-                //Declares a var for the ping msg data
-                pingData = 0;
-            }
-            @Override
-            //This is what happens when the loop starts
-            protected void loop() throws InterruptedException {
-                //Instantiate ping msg object
-                robot_msgs.Ping ping = pingPublisher.newMessage();
-                //Sets the byte to 0
-                ping.setData(pingData);
-                //Adds ping logging msg to make sure that it is pinging
-                Log.d(TAG, "Ping Sent");
-            }
-        });
+            //CancellableLoop is made and started
+            connectedNode.executeCancellableLoop(new CancellableLoop() {
+                //Initalizes a var for the ping msg data
+                private byte pingData;
+
+                @Override
+                protected void setup() {
+                    //Declares a var for the ping msg data
+                    pingData = 0;
+                }
+
+                @Override
+                //This is what happens when the loop starts
+                protected void loop() throws InterruptedException {
+                    //Instantiate ping msg object
+                    robot_msgs.Ping ping = pingPublisher.newMessage();
+                    //Sets the byte to 0
+                    ping.setData(pingData);
+                    //Adds ping logging msg to make sure that it is pinging
+                    Log.d(TAG, "Ping Sent");
+                }
+            });
             connectedNodeFlag = true;
-        }
-        else{
+        } else {
             connectedNodeFlag = false;
         }
     }
 
-    public boolean getStatus(int viewId){
-        switch (viewId) {
+    public boolean getStatus(int viewId) {
+        switch(viewId) {
             case R.id.robot_code_active:
                 return robotCodeActive;
 
@@ -123,13 +125,13 @@ public class Protocol extends AbstractNodeMain {
         }
     }
 
-    public boolean isPublisherActive(){
+    public boolean isPublisherActive() {
         return publisherActive;
     }
 
     //Function for setting the stick given the axis and the value
     public void setStick(int axis, float value) {
-        switch (axis) {
+        switch(axis) {
             case MotionEvent.AXIS_X:
                 controlData.setAxis(ControlIDs.LTHUMBX, value);
                 break;
@@ -162,7 +164,7 @@ public class Protocol extends AbstractNodeMain {
     // for pressing buttons
     public void sendButton(int keycode, boolean pressed) {
         boolean wasChanged;
-        switch (keycode) {
+        switch(keycode) {
             case KeyEvent.KEYCODE_BUTTON_A:
                 wasChanged = controlData.setButton(ControlIDs.A, pressed);
                 break;
@@ -204,12 +206,10 @@ public class Protocol extends AbstractNodeMain {
         }
 
         // send the data on change
-        if (wasChanged&&connectedNodeFlag) {
+        if(wasChanged && connectedNodeFlag) {
             sendData();
             publisherActive = true;
-        }
-        else
-        {
+        } else {
             publisherActive = false;
         }
     }
@@ -219,8 +219,8 @@ public class Protocol extends AbstractNodeMain {
         ControlData data = controlData;
         robot_msgs.Teleop robo = publisher.newMessage();
         // Set axes
-        for (int i = 0; i < data.data.length; i++) {
-            switch (i) {
+        for(int i = 0; i < data.data.length; i++) {
+            switch(i) {
                 case ControlIDs.LTHUMBX:
                     robo.setXLThumb(data.data[i]);
                     break;
@@ -254,8 +254,8 @@ public class Protocol extends AbstractNodeMain {
             }
         }
         // Set buttons
-        for (int i = 0; i < data.buttonData.length; i++) {
-            switch (i) {
+        for(int i = 0; i < data.buttonData.length; i++) {
+            switch(i) {
                 case ControlIDs.A:
                     robo.setA(data.buttonData[i]);
                     break;
@@ -354,7 +354,7 @@ public class Protocol extends AbstractNodeMain {
         public ControlData(ControlData oldData) {
             this.data = new float[oldData.data.length];
             // deep copy old data
-            for (int i = 0; i < oldData.data.length; i++) {
+            for(int i = 0; i < oldData.data.length; i++) {
                 this.data[i] = oldData.data[i];
             }
         }
@@ -364,7 +364,7 @@ public class Protocol extends AbstractNodeMain {
         // returns true if button was changed, false if not
         public boolean setButton(int ID, boolean down) {
             boolean oldval = buttonData[ID];
-            if (down) {
+            if(down) {
                 buttonData[ID] = true;
             } else {
                 buttonData[ID] = false;
@@ -375,15 +375,15 @@ public class Protocol extends AbstractNodeMain {
         // assumes the id is for an axis
         // takes value from -1 to 1 and converts to specified range
         public void setAxis(int ID, float value) {
-            if (value > AXIS_BOUNDS) {
+            if(value > AXIS_BOUNDS) {
                 // cap at 1.0
-                if (value > AXIS_MAX) {
+                if(value > AXIS_MAX) {
                     value = AXIS_MAX;
                 }
                 data[ID] = value;
-            } else if (value < -AXIS_BOUNDS) {
+            } else if(value < -AXIS_BOUNDS) {
                 // cap at -1.0
-                if (value < -AXIS_MAX) {
+                if(value < -AXIS_MAX) {
                     value = -AXIS_FLOAT_MAX;
                 }
                 data[ID] = value;
@@ -394,18 +394,18 @@ public class Protocol extends AbstractNodeMain {
 
         // dpad comes as a float, but should be set to on or off
         public void setDpad(int eventCode, float value) {
-            if (eventCode == MotionEvent.AXIS_HAT_X) {
-                if (value > DPAD_BOUNDS) {
+            if(eventCode == MotionEvent.AXIS_HAT_X) {
+                if(value > DPAD_BOUNDS) {
                     dpad_x = 1;
-                } else if (value < -DPAD_BOUNDS) {
+                } else if(value < -DPAD_BOUNDS) {
                     dpad_x = -1;
                 } else {
                     dpad_x = 0;
                 }
-            } else if (eventCode == MotionEvent.AXIS_HAT_Y) {
-                if (value > DPAD_BOUNDS) {
+            } else if(eventCode == MotionEvent.AXIS_HAT_Y) {
+                if(value > DPAD_BOUNDS) {
                     dpad_y = 1;
-                } else if (value < -DPAD_BOUNDS) {
+                } else if(value < -DPAD_BOUNDS) {
                     dpad_y = -1;
                 } else {
                     dpad_y = 0;
@@ -416,11 +416,11 @@ public class Protocol extends AbstractNodeMain {
         // return a printable string, for debugging
         public java.lang.String toString() {
             java.lang.String str = "Axes => ";
-            for (int i = 0; i < data.length; i++) {
+            for(int i = 0; i < data.length; i++) {
                 str += i + ": " + data[i] + ", ";
             }
             str += "Buttons => ";
-            for (int i = 0; i < buttonData.length; i++) {
+            for(int i = 0; i < buttonData.length; i++) {
                 str += i + ": " + buttonData[i] + ", ";
             }
             str += "Dpad => x: " + dpad_x + ", y: " + dpad_y;
