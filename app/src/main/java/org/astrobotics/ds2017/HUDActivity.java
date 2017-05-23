@@ -254,10 +254,15 @@ public class HUDActivity extends RosActivity {
     }
 
     private void updateStatusGui() {
-        setStatus(R.id.robot_code_active);
-        setStatus(R.id.deadman_pressed);
-        setStatus(R.id.autonomy_active);
-        setSpinner(protocol.isPublisherActive());
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setStatus(R.id.robot_code_active);
+                setStatus(R.id.deadman_pressed);
+                setStatus(R.id.autonomy_active);
+                setSpinner(protocol.isPublisherActive());
+            }
+        });
     }
 
     private void loadStream(String url) {

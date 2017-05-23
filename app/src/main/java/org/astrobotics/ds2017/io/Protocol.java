@@ -33,6 +33,7 @@ public class Protocol extends AbstractNodeMain {
     private static java.lang.String TELEOP_TOPIC = "/robot/teleop";
     private static java.lang.String STATUS_TOPIC = "/robot/status";
     private static java.lang.String PING_TOPIC = "/driver/ping";
+    private static int PING_DELAY = 1000;
     private boolean robotCodeActive = false;
     private boolean autonomyActive = false;
     private boolean deadmanPressed = false;
@@ -62,52 +63,51 @@ public class Protocol extends AbstractNodeMain {
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
-        if(connectedNode.lookupServiceUri(TELEOP_TOPIC) != null) {
-            //Instantiates the publishers for the Teleop data and Ping data
-            publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
-            pingPublisher = connectedNode.newPublisher(PING_TOPIC, std_msgs.Bool._TYPE);
-            //Instantiate status msg object for subscriber and declares
-            Subscriber<robot_msgs.Status> statusSubscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
-            //Adds listener for subscriber
-            statusSubscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
-                @Override
-                public void onNewMessage(robot_msgs.Status message) {
-                    //Receives status data and stores in var for display in HUDActivity
-                    robotCodeActive = message.getRobotCodeActive();
-                    autonomyActive = message.getAutonomyActive();
-                    deadmanPressed = message.getDeadmanPressed();
-                    //Adds logging messsage to make sure that it is sending data
-                    Log.d(TAG, "Receiving Status Data");
-                    if(updateListener != null) {
-                        updateListener.statusUpdated();
-                    }
+        //Instantiates the publishers for the Teleop data and Ping data
+        publisher = connectedNode.newPublisher(TELEOP_TOPIC, robot_msgs.Teleop._TYPE);
+        pingPublisher = connectedNode.newPublisher(PING_TOPIC, std_msgs.Bool._TYPE);
+        //Instantiate status msg object for subscriber and declares
+        Subscriber<robot_msgs.Status> statusSubscriber = connectedNode.newSubscriber(STATUS_TOPIC, robot_msgs.Status._TYPE);
+        //Adds listener for subscriber
+        statusSubscriber.addMessageListener(new MessageListener<robot_msgs.Status>() {
+            @Override
+            public void onNewMessage(robot_msgs.Status message) {
+                //Receives status data and stores in var for display in HUDActivity
+                robotCodeActive = message.getRobotCodeActive();
+                autonomyActive = message.getAutonomyActive();
+                deadmanPressed = message.getDeadmanPressed();
+                //Adds logging messsage to make sure that it is sending data
+                Log.d(TAG, "Receiving Status Data");
+                if(updateListener != null) {
+                    updateListener.statusUpdated();
                 }
-            });
-
-            //CancellableLoop is made and started
-            connectedNode.executeCancellableLoop(new CancellableLoop() {
-                @Override
-                protected void setup() {
-                }
-
-                @Override
-                //This is what happens when the loop starts
-                protected void loop() throws InterruptedException {
-                    //Instantiate ping msg object
-                    std_msgs.Bool ping = pingPublisher.newMessage();
-                    //Sets the byte to 0
-                    ping.setData(true);
-                    //Adds ping logging msg to make sure that it is pinging
-                    Log.d(TAG, "Ping Sent");
-                }
-            });
-            connectedNodeFlag = true;
-
-            if(updateListener != null) {
-                updateListener.statusUpdated();
             }
-        } else {
-            connectedNodeFlag = false;
+        });
+
+        //CancellableLoop is made and started
+        connectedNode.executeCancellableLoop(new CancellableLoop() {
+            @Override
+            protected void setup() {
+            }
+
+            @Override
+            //This is what happens when the loop starts
+            protected void loop() throws InterruptedException {
+                //Instantiate ping msg object
+                std_msgs.Bool ping = pingPublisher.newMessage();
+                //Sets the byte to 0
+                ping.setData(true);
+                pingPublisher.publish(ping);
+                //Adds ping logging msg to make sure that it is pinging
+                Log.d(TAG, "Ping Sent");
+                Thread.sleep(PING_DELAY);
+            }
+        });
+
+        connectedNodeFlag = true;
+
+        if(updateListener != null) {
+            updateListener.statusUpdated();
         }
     }
 
