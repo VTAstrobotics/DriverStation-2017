@@ -1,6 +1,5 @@
 package org.astrobotics.ds2017;
 
-import java.io.IOException;
 import java.net.URI;
 
 import android.net.wifi.WifiInfo;
@@ -27,7 +26,6 @@ import android.widget.ProgressBar;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.astrobotics.ds2017.io.MjpegView;
 import org.astrobotics.ds2017.io.Protocol;
@@ -35,9 +33,8 @@ import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
-import static android.content.ContentValues.TAG;
-
 public class HUDActivity extends RosActivity {
+    private static final java.lang.String TAG = "ds2017";
     private static final int[] AXES = new int[] {MotionEvent.AXIS_X, MotionEvent.AXIS_Y,
             MotionEvent.AXIS_Z, MotionEvent.AXIS_RZ, MotionEvent.AXIS_BRAKE,
             MotionEvent.AXIS_GAS, MotionEvent.AXIS_HAT_X, MotionEvent.AXIS_HAT_Y};
