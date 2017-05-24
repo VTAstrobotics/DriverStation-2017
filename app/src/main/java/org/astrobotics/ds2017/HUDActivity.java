@@ -32,6 +32,8 @@ import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
+import robot_msgs.MotorFeedback;
+
 public class HUDActivity extends RosActivity {
     private static final java.lang.String TAG = "ds2017";
     private static final int[] AXES = new int[] {MotionEvent.AXIS_X, MotionEvent.AXIS_Y,
@@ -66,6 +68,18 @@ public class HUDActivity extends RosActivity {
             @Override
             public void statusUpdated() {
                 updateStatusGui();
+            }
+
+            @Override
+            public void feedbackReceived(MotorFeedback feedback) {
+                TextView voltage = (TextView)findViewById(R.id.battery_voltage);
+                voltage.setText("BATTERY VOLTAGE: " + feedback.getBatVoltage() + "V");
+
+                TextView liftAngle = (TextView)findViewById(R.id.lift_angle);
+                liftAngle.setText(feedback.getLiftPos() + "°");
+
+                TextView liftCurrent = (TextView)findViewById(R.id.lift_current);
+                liftCurrent.setText(feedback.getLiftCurrent() + "A");
             }
         });
 

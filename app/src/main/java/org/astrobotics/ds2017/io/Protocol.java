@@ -18,11 +18,6 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import robot_msgs.Status;
-import robot_msgs.Teleop;
-import robot_msgs.Ping;
-
-
 /**
  * Implements the network protocol
  */
@@ -30,9 +25,10 @@ public class Protocol extends AbstractNodeMain {
     private static final java.lang.String TAG = "ds2017";
     private static final int DEADMAN = KeyEvent.KEYCODE_BUTTON_L1;
     private static InetAddress ROBOT_ADDRESS = null;
-    private static java.lang.String TELEOP_TOPIC = "/robot/teleop";
-    private static java.lang.String STATUS_TOPIC = "/robot/status";
-    private static java.lang.String PING_TOPIC = "/driver/ping";
+    private static String TELEOP_TOPIC = "/robot/teleop";
+    private static String STATUS_TOPIC = "/robot/status";
+    private static String FEEDBACK_TOPIC = "/robot/motor/feedback";
+    private static String PING_TOPIC = "/driver/ping";
     private static int PING_DELAY = 1000;
     private boolean robotCodeActive = false;
     private boolean autonomyActive = false;
@@ -80,6 +76,15 @@ public class Protocol extends AbstractNodeMain {
                 Log.d(TAG, "Receiving Status Data");
                 if(updateListener != null) {
                     updateListener.statusUpdated();
+                }
+            }
+        });
+        Subscriber<robot_msgs.MotorFeedback> feedbackSubscriber = connectedNode.newSubscriber(FEEDBACK_TOPIC, robot_msgs.MotorFeedback._TYPE);
+        feedbackSubscriber.addMessageListener(new MessageListener<robot_msgs.MotorFeedback>() {
+            @Override
+            public void onNewMessage(robot_msgs.MotorFeedback motorFeedback) {
+                if(updateListener != null) {
+                    updateListener.feedbackReceived(motorFeedback);
                 }
             }
         });
@@ -429,5 +434,6 @@ public class Protocol extends AbstractNodeMain {
 
     public static interface UpdateListener {
         public void statusUpdated();
+        public void feedbackReceived(robot_msgs.MotorFeedback feedback);
     }
 }

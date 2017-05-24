@@ -7,4 +7,6 @@
     <string name="publisher_active">ROBOT CONNECTED</string>
     <string name="autonomy_disabled">AUTONOMY DISABLED</string>
     <string name="autonomy_enabled">AUTONOMY ENABLED</string>
+    <string name="lift_angle_label">Lift angle:</string>
+    <string name="lift_current_label">Lift current:</string>
 </resources>

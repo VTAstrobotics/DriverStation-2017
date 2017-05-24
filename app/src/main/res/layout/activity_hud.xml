@@ -67,5 +67,38 @@
             android:layout_above="@+id/textView3"
             android:layout_centerHorizontal="true" android:layout_weight="1"/>
     </LinearLayout>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" android:orientation="vertical">
+        <TextView
+            android:id="@+id/lift_angle_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/lift_angle_label"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"/>
+        <TextView
+            android:id="@+id/lift_angle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_toRightOf="@id/lift_angle_label"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="63dp" android:layout_marginStart="63dp"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"/>
+        <TextView
+            android:id="@+id/lift_current_label" android:layout_below="@id/lift_angle_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/lift_current_label"/>
+        <TextView
+            android:id="@+id/lift_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_toRightOf="@id/lift_current_label"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="63dp" android:layout_marginStart="63dp"/>
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/battery_voltage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
