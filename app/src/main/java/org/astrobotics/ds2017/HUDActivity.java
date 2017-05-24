@@ -2,6 +2,7 @@ package org.astrobotics.ds2017;
 
 import java.net.URI;
 
+import android.graphics.Color;
 import android.net.wifi.WifiInfo;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -23,8 +24,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
-import android.widget.RadioGroup.OnCheckedChangeListener;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import org.astrobotics.ds2017.io.MjpegView;
@@ -50,7 +49,7 @@ public class HUDActivity extends RosActivity {
     private Protocol protocol;
     private MjpegView mjpegView;
     private BroadcastReceiver wifiReceiver;
-    private boolean oldRobotUp = false;
+    private boolean oldDeadman = false;
 
     public HUDActivity() {
         super("Astrobotics", "Driver Station 2017", ROBOT_ROS_URI);
@@ -61,26 +60,7 @@ public class HUDActivity extends RosActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hud);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        RadioGroup streamButtons;
 
-        // set radio buttons
-        streamButtons = (RadioGroup) findViewById(R.id.stream_buttons);
-        streamButtons.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId == R.id.cam_left) {
-                    Log.d("HUDActivity", "cam_left selected");
-                    stopStream();
-                    loadStream(url_left);
-                } else if(checkedId == R.id.cam_right) {
-                    Log.d("HUDActivity", "cam_right selected");
-                    stopStream();
-                    loadStream(url_right);
-                } else if(checkedId == R.id.cam_none) {
-                    Log.d("HUDActivity", "cam_none selected");
-                    stopStream();
-                }
-            }
-        });
         protocol = new Protocol();
         protocol.setUpdateListener(new Protocol.UpdateListener() {
             @Override
@@ -187,15 +167,26 @@ public class HUDActivity extends RosActivity {
         return super.onGenericMotionEvent(event);
     }
 
-    public void setRobotUp(final boolean robotUp) {
-        if(robotUp != oldRobotUp) {
+    private void setDeadmanPressed(final boolean deadman) {
+        if(deadman != oldDeadman) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    setIndicator(R.id.robot_status, robotUp);
+                    setIndicator(R.id.robot_status, deadman);
                 }
             });
-            oldRobotUp = robotUp;
+            oldDeadman = deadman;
+        }
+    }
+
+    private void setAutonomyEnabled(boolean enabled) {
+        TextView autoText = (TextView)findViewById(R.id.autonomy_active);
+        if(enabled) {
+            autoText.setText(R.string.autonomy_enabled);
+            autoText.setTextColor(Color.GREEN);
+        } else {
+            autoText.setText(R.string.autonomy_disabled);
+            autoText.setTextColor(Color.RED);
         }
     }
 
@@ -217,36 +208,19 @@ public class HUDActivity extends RosActivity {
         }
     }
 
-    private void setStatus(int viewId){
-        TextView textView = (TextView) findViewById(viewId);
-        switch (viewId) {
-            case R.id.robot_code_active:
-                boolean active = protocol.getStatus(R.id.robot_code_active);
-                textView.setText("Robot Code Active: "+String.valueOf(active));
-                setRobotUp(active);
-                break;
-            case R.id.autonomy_active:
-                textView.setText("Autonomy Active: "+String.valueOf(protocol.getStatus(R.id.autonomy_active)));
-                break;
-            case R.id.deadman_pressed:
-                textView.setText("Deadman Pressed: "+String.valueOf(protocol.getStatus(R.id.deadman_pressed)));
-                break;
-            default:
-                Log.d(TAG, "Problem with status ID");
-                break;
-        }
-    }
-
+    // true = connecting, false = connected
     private void setSpinner(boolean spinning){
-        ProgressBar spinner = (ProgressBar)findViewById(R.id.ActivePublisher);
+        ProgressBar spinner = (ProgressBar)findViewById(R.id.active_publisher_spinner);
         TextView textView = (TextView) findViewById(R.id.active_publisher);
         if (spinning){
             spinner.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.VISIBLE);
+            textView.setText(R.string.publisher_connecting);
+            textView.setTextColor(textView.getTextColors().getDefaultColor());
         }
         else{
             spinner.setVisibility(View.GONE);
-            textView.setVisibility(View.GONE);
+            textView.setText(R.string.publisher_active);
+            textView.setTextColor(Color.GREEN);
         }
     }
 
@@ -254,34 +228,14 @@ public class HUDActivity extends RosActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                setStatus(R.id.robot_code_active);
-                setStatus(R.id.deadman_pressed);
-                setStatus(R.id.autonomy_active);
-                setSpinner(protocol.isPublisherActive());
+                // Deadman indicator
+                setDeadmanPressed(protocol.getDeadmanPressed());
+                // Autonomy indicator
+                setAutonomyEnabled(protocol.getAutonomyActive());
+                // Publisher active indicator
+                setSpinner(!protocol.isPublisherActive());
             }
         });
-    }
-
-    private void loadStream(String url) {
-        mjpegView = (MjpegView) findViewById(R.id.stream);
-        try {
-            mjpegView.setSource(url);
-            mjpegView.setDisplayMode(MjpegView.SIZE_BEST_FIT);
-            mjpegView.showFps(true);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        mjpegView.setVisibility(View.VISIBLE);
-    }
-
-    private void stopStream() {
-        // stop both streams
-        // and don't waste data
-        // hopefully this works
-        if(mjpegView != null) {
-            mjpegView.stopPlayback();
-            mjpegView.setVisibility(View.INVISIBLE);
-        }
     }
 
     // Update gamepad status indicator

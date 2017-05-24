@@ -111,21 +111,16 @@ public class Protocol extends AbstractNodeMain {
         }
     }
 
-    public boolean getStatus(int viewId) {
-        switch(viewId) {
-            case R.id.robot_code_active:
-                return robotCodeActive;
+    public boolean getRobotCodeActive() {
+        return robotCodeActive;
+    }
 
-            case R.id.autonomy_active:
-                return autonomyActive;
+    public boolean getAutonomyActive() {
+        return autonomyActive;
+    }
 
-            case R.id.deadman_pressed:
-                return deadmanPressed;
-
-            default:
-                Log.d(TAG, "Problem Getting Status");
-                return false;
-        }
+    public boolean getDeadmanPressed() {
+        return deadmanPressed;
     }
 
     public void setUpdateListener(UpdateListener listener) {

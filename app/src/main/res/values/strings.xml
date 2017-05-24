@@ -3,7 +3,8 @@
     <string name="cam_left">Left Camera</string>
     <string name="cam_right">Right Camera</string>
     <string name="cam_none">No Camera</string>
-    <string name="robot_code_active">RobotCodeActive</string>
-    <string name="autonomy_active">AutonomyActive</string>
-    <string name="deadman_pressed">DeadmanPressed</string>
+    <string name="publisher_connecting">Connecting to robot...</string>
+    <string name="publisher_active">ROBOT CONNECTED</string>
+    <string name="autonomy_disabled">AUTONOMY DISABLED</string>
+    <string name="autonomy_enabled">AUTONOMY ENABLED</string>
 </resources>
