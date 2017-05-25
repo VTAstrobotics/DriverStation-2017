@@ -2,22 +2,21 @@ package org.astrobotics.ds2017;
 
 import java.net.URI;
 
-import android.graphics.Color;
-import android.net.wifi.WifiInfo;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.hardware.input.InputManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -28,6 +27,7 @@ import android.widget.TextView;
 
 import org.astrobotics.ds2017.io.MjpegView;
 import org.astrobotics.ds2017.io.Protocol;
+import org.ros.android.NodeMainExecutorService;
 import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
@@ -51,6 +51,7 @@ public class HUDActivity extends RosActivity {
     private Protocol protocol;
     private MjpegView mjpegView;
     private BroadcastReceiver wifiReceiver;
+    private NodeMainExecutor nodeExecutor;
     private boolean oldDeadman = false;
 
     public HUDActivity() {
@@ -118,15 +119,17 @@ public class HUDActivity extends RosActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(wifiReceiver);
+    protected void init(NodeMainExecutor nodeMainExecutor) {
+        nodeExecutor = nodeMainExecutor;
+        NodeConfiguration protocolConfig = NodeConfiguration.newPublic(getRosHostname(), getMasterUri());
+        nodeMainExecutor.execute(protocol, protocolConfig);
     }
 
     @Override
-    protected void init(NodeMainExecutor nodeMainExecutor) {
-        NodeConfiguration protocolConfig = NodeConfiguration.newPublic(getRosHostname(), getMasterUri());
-        nodeMainExecutor.execute(protocol, protocolConfig);
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(wifiReceiver);
+        ((NodeMainExecutorService)nodeExecutor).forceShutdown();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
