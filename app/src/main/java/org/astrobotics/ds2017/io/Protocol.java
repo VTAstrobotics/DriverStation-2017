@@ -33,6 +33,7 @@ public class Protocol extends AbstractNodeMain {
     private boolean robotCodeActive = false;
     private boolean autonomyActive = false;
     private boolean deadmanPressed = false;
+    private boolean limitsOverride = false;
     private boolean connectedNodeFlag = false;
     private DatagramSocket socket_send, socket_ping, socket_receive;
     // instance of current control data
@@ -72,6 +73,7 @@ public class Protocol extends AbstractNodeMain {
                 robotCodeActive = message.getRobotCodeActive();
                 autonomyActive = message.getAutonomyActive();
                 deadmanPressed = message.getDeadmanPressed();
+                limitsOverride = message.getLimitsOverride();
                 //Adds logging messsage to make sure that it is sending data
                 Log.d(TAG, "Receiving Status Data");
                 if(updateListener != null) {

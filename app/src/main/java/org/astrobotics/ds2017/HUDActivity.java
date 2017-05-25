@@ -72,14 +72,7 @@ public class HUDActivity extends RosActivity {
 
             @Override
             public void feedbackReceived(MotorFeedback feedback) {
-                TextView voltage = (TextView)findViewById(R.id.battery_voltage);
-                voltage.setText("BATTERY VOLTAGE: " + feedback.getBatVoltage() + "V");
-
-                TextView liftAngle = (TextView)findViewById(R.id.lift_angle);
-                liftAngle.setText(feedback.getLiftPos() + "°");
-
-                TextView liftCurrent = (TextView)findViewById(R.id.lift_current);
-                liftCurrent.setText(feedback.getLiftCurrent() + "A");
+                updateFeedbackGui(feedback);
             }
         });
 
@@ -248,6 +241,22 @@ public class HUDActivity extends RosActivity {
                 setAutonomyEnabled(protocol.getAutonomyActive());
                 // Publisher active indicator
                 setSpinner(!protocol.isPublisherActive());
+            }
+        });
+    }
+
+    private void updateFeedbackGui(final MotorFeedback feedback) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView voltage = (TextView)findViewById(R.id.battery_voltage);
+                voltage.setText("BATTERY VOLTAGE: " + feedback.getBatVoltage() + "V");
+
+                TextView liftAngle = (TextView)findViewById(R.id.lift_angle);
+                liftAngle.setText(((int)(feedback.getLiftPos()*100)/100.0f) + "°");
+
+                TextView liftCurrent = (TextView)findViewById(R.id.lift_current);
+                liftCurrent.setText(feedback.getLiftCurrent() + "A");
             }
         });
     }
