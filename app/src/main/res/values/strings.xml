@@ -10,4 +10,6 @@
     <string name="lift_angle_label">Lift angle:</string>
     <string name="lift_current_label">Lift current:</string>
     <string name="limit_override">! LIFT LIMIT OVERRIDE !</string>
+    <string name="drum_rpm_label">Drum RPM:</string>
+    <string name="drum_current_label">Drum current:</string>
 </resources>

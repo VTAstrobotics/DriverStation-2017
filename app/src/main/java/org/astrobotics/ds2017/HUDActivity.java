@@ -241,6 +241,9 @@ public class HUDActivity extends RosActivity {
                 setAutonomyEnabled(protocol.getAutonomyActive());
                 // Publisher active indicator
                 setSpinner(!protocol.isPublisherActive());
+                // Storage-lift limit override
+                int visibility = (protocol.getLimitsOverride() ? View.VISIBLE : View.INVISIBLE);
+                findViewById(R.id.limit_override).setVisibility(visibility);
             }
         });
     }
@@ -254,9 +257,20 @@ public class HUDActivity extends RosActivity {
 
                 TextView liftAngle = (TextView)findViewById(R.id.lift_angle);
                 liftAngle.setText(((int)(feedback.getLiftPos()*100)/100.0f) + "°");
+                if(feedback.getLiftDownLimit() || feedback.getLiftUpLimit()) {
+                    liftAngle.setTextColor(Color.RED);
+                } else {
+                    liftAngle.setTextColor(liftAngle.getTextColors().getDefaultColor());
+                }
 
                 TextView liftCurrent = (TextView)findViewById(R.id.lift_current);
                 liftCurrent.setText(feedback.getLiftCurrent() + "A");
+
+                TextView drumRpm = (TextView)findViewById(R.id.drum_rpm);
+                drumRpm.setText(feedback.getDrumRPM() + " RPM");
+
+                TextView drumCurrent = (TextView)findViewById(R.id.drum_current);
+                drumCurrent.setText(feedback.getDrumCurrent() + "A");
             }
         });
     }

@@ -95,6 +95,35 @@
             android:layout_below="@id/lift_angle_label"
             android:layout_toRightOf="@id/lift_current_label" android:textSize="22sp"/>
     </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
+        android:layout_marginLeft="300sp" android:orientation="vertical">
+        <TextView
+            android:id="@+id/drum_rpm_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginRight="4dp"
+            android:text="@string/drum_rpm_label" android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/drum_rpm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/drum_rpm_label"
+            android:layout_toRightOf="@id/drum_rpm_label" android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/drum_current_label" android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/drum_rpm_label" android:layout_marginRight="4dp"
+            android:text="@string/drum_current_label" android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/drum_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/drum_rpm_label"
+            android:layout_toRightOf="@id/drum_current_label" android:textSize="22sp"/>
+    </RelativeLayout>
     <TextView
         android:id="@+id/battery_voltage"
         android:layout_width="wrap_content"

@@ -75,7 +75,7 @@ public class Protocol extends AbstractNodeMain {
                 deadmanPressed = message.getDeadmanPressed();
                 limitsOverride = message.getLimitsOverride();
                 //Adds logging messsage to make sure that it is sending data
-                Log.d(TAG, "Receiving Status Data");
+//                Log.d(TAG, "Receiving Status Data");
                 if(updateListener != null) {
                     updateListener.statusUpdated();
                 }
@@ -128,6 +128,10 @@ public class Protocol extends AbstractNodeMain {
 
     public boolean getDeadmanPressed() {
         return deadmanPressed;
+    }
+
+    public boolean getLimitsOverride() {
+        return limitsOverride;
     }
 
     public void setUpdateListener(UpdateListener listener) {
