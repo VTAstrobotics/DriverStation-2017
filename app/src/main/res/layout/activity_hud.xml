@@ -134,6 +134,17 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/drum_current_label"
             android:layout_toRightOf="@id/drive_current_label" android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/storage_current_label" android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/drive_current_label" android:layout_marginRight="4dp"
+            android:text="@string/storage_current" android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/storage_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/drive_current_label"
+            android:layout_toRightOf="@id/storage_current_label" android:textSize="22sp"/>
     </RelativeLayout>
     <TextView
         android:id="@+id/battery_voltage"

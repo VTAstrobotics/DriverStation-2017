@@ -13,4 +13,5 @@
     <string name="drum_rpm_label">Drum RPM:</string>
     <string name="drum_current_label">Drum current:</string>
     <string name="drive_current_label">Drive current:</string>
+    <string name="storage_current">Storage current:</string>
 </resources>

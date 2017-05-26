@@ -279,6 +279,9 @@ public class HUDActivity extends RosActivity {
                 String driveStr = "L " + feedback.getLeftTreadRPM() + "A"
                                 + " ⋅ R " + feedback.getRightTreadRPM() + "A";
                 driveCurrent.setText(driveStr);
+
+                TextView storageCurrent = (TextView)findViewById(R.id.storage_current);
+                storageCurrent.setText(feedback.getStorageCurrent() + "A");
             }
         });
     }
