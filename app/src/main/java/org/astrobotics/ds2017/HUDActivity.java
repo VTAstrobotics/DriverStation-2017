@@ -276,8 +276,8 @@ public class HUDActivity extends RosActivity {
                 drumCurrent.setText(feedback.getDrumCurrent() + "A");
 
                 TextView driveCurrent = (TextView)findViewById(R.id.drive_current);
-                String driveStr = "L " + feedback.getLeftTreadRPM()
-                                + " ⋅ R " + feedback.getRightTreadRPM();
+                String driveStr = "L " + feedback.getLeftTreadRPM() + "A"
+                                + " ⋅ R " + feedback.getRightTreadRPM() + "A";
                 driveCurrent.setText(driveStr);
             }
         });
