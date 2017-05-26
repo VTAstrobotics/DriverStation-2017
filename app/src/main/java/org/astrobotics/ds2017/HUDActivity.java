@@ -258,12 +258,13 @@ public class HUDActivity extends RosActivity {
                 TextView voltage = (TextView)findViewById(R.id.battery_voltage);
                 voltage.setText("BATTERY VOLTAGE: " + feedback.getBatVoltage() + "V");
 
+                TextView liftAngleLabel = (TextView)findViewById(R.id.lift_angle_label);
                 TextView liftAngle = (TextView)findViewById(R.id.lift_angle);
                 liftAngle.setText(((int)(feedback.getLiftPos()*100)/100.0f) + "°");
                 if(feedback.getLiftDownLimit() || feedback.getLiftUpLimit()) {
                     liftAngle.setTextColor(Color.RED);
                 } else {
-                    liftAngle.setTextColor(liftAngle.getTextColors().getDefaultColor());
+                    liftAngle.setTextColor(liftAngleLabel.getTextColors());
                 }
 
                 TextView liftCurrent = (TextView)findViewById(R.id.lift_current);
@@ -276,8 +277,8 @@ public class HUDActivity extends RosActivity {
                 drumCurrent.setText(feedback.getDrumCurrent() + "A");
 
                 TextView driveCurrent = (TextView)findViewById(R.id.drive_current);
-                String driveStr = "L " + feedback.getLeftTreadRPM() + "A"
-                                + " ⋅ R " + feedback.getRightTreadRPM() + "A";
+                String driveStr = "L " + feedback.getLeftTreadCurrent() + "A"
+                                + " ⋅ R " + feedback.getRightTreadCurrent() + "A";
                 driveCurrent.setText(driveStr);
 
                 TextView storageCurrent = (TextView)findViewById(R.id.storage_current);
