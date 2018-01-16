@@ -438,6 +438,9 @@ public class Protocol extends AbstractNodeMain {
         }
     }
 
+    //interface provides methods headers
+    //allow class's to provide definitions for updating it's
+    //status and getting feedback from ROS
     public static interface UpdateListener {
         public void statusUpdated();
         public void feedbackReceived(robot_msgs.MotorFeedback feedback);

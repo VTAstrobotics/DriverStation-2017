@@ -125,6 +125,8 @@ public class HUDActivity extends RosActivity {
         nodeMainExecutor.execute(protocol, protocolConfig);
     }
 
+    //OnDestroy is used to clean up and recover the memory and data used by the application
+    //this method will unregister the wifiReceiver and will shutdown all ROS nodes
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -189,6 +191,9 @@ public class HUDActivity extends RosActivity {
         }
     }
 
+    //setAutonomyEnabled is used to update the application screen
+    //@-param enabled is passed to the method to determine if the
+    //  the button was pressed and the autonomy should now be enabled
     private void setAutonomyEnabled(boolean enabled) {
         TextView autoText = (TextView)findViewById(R.id.autonomy_active);
         if(enabled) {
@@ -250,7 +255,8 @@ public class HUDActivity extends RosActivity {
             }
         });
     }
-
+    //update the app GUI with information comming from the ROS nodes
+    //voltage, lift current, lift position, drum rpm and drum current
     private void updateFeedbackGui(final MotorFeedback feedback) {
         runOnUiThread(new Runnable() {
             @Override
@@ -314,22 +320,23 @@ public class HUDActivity extends RosActivity {
         ((TextView)findViewById(R.id.wifiLabel)).setText(Html.fromHtml(wifiText));
     }
 
+    //Class: WifiChangedReceiver contains methods for changes in wifi state
     private class WifiChangedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(!intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-                return;
-            }
-            NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            if(netInfo.getState() == NetworkInfo.State.CONNECTED) {
+            if(!intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {//checks to see if the state has changed
+                return; //exit the method if it hasn't changed
+            } //gets info about the access point to which the application is connected
+            NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO); //retrieves network info from the Wifi-Manager
+            if(netInfo.getState() == NetworkInfo.State.CONNECTED) { //checks to see if the network is currently connected
                 WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
-                if(wifiInfo.getSSID().equals("<unknown ssid>")) {
-                    updateWifiInfo(null);
+                if(wifiInfo.getSSID().equals("<unknown ssid>")) { //checks to see if the SSID is unknown
+                    updateWifiInfo(null); //reports back that it's disconnected
                 } else {
                     updateWifiInfo(wifiInfo);
                 }
-            } else if(netInfo.getState() == NetworkInfo.State.DISCONNECTED){
-                updateWifiInfo(null);
+            } else if(netInfo.getState() == NetworkInfo.State.DISCONNECTED){//current network state is disconnected
+                updateWifiInfo(null); //reports to back that it's disconnected
             }
         }
     }
