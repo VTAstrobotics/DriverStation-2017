@@ -64,6 +64,8 @@ public class HUDActivity extends RosActivity {
         setContentView(R.layout.activity_hud);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        //creates an instance of the Protocol class
+        //this will implement the Network protocol
         protocol = new Protocol();
         protocol.setUpdateListener(new Protocol.UpdateListener() {
             @Override
@@ -103,7 +105,7 @@ public class HUDActivity extends RosActivity {
 
         updateGamepadStatus();
         updateStatusGui();
-
+        
         wifiReceiver = new WifiChangedReceiver();
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 
