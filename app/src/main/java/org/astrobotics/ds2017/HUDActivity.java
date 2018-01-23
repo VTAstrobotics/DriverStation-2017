@@ -105,7 +105,7 @@ public class HUDActivity extends RosActivity {
 
         updateGamepadStatus();
         updateStatusGui();
-        
+
         wifiReceiver = new WifiChangedReceiver();
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 
@@ -181,6 +181,9 @@ public class HUDActivity extends RosActivity {
         return super.onGenericMotionEvent(event);
     }
 
+    // deadman is used to ensure no robot movements happen
+    // unintentionally
+    // @param - deadman changes to true when the button is pressed
     private void setDeadmanPressed(final boolean deadman) {
         if(deadman != oldDeadman) {
             runOnUiThread(new Runnable() {
@@ -240,6 +243,14 @@ public class HUDActivity extends RosActivity {
             textView.setTextColor(Color.GREEN);
         }
     }
+
+    // updates the GUI of the application
+    /*
+      this will call methods to update objects used
+      such as the deadman pressed icon, autonomy on,
+      and override. It also checks to see if the ROS publisher
+      is active and updates it if true
+     */
 
     private void updateStatusGui() {
         runOnUiThread(new Runnable() {

@@ -443,6 +443,8 @@ public class Protocol extends AbstractNodeMain {
     //status and getting feedback from ROS
     public static interface UpdateListener {
         public void statusUpdated();
-        public void feedbackReceived(robot_msgs.MotorFeedback feedback);
+        public void
+
+        feedbackReceived(robot_msgs.MotorFeedback feedback);
     }
 }
